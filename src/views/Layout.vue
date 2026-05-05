@@ -13,7 +13,7 @@
             <el-icon class="nav-icon" @click="toggleSidebar">
               <Menu />
             </el-icon>
-            <el-icon class="nav-icon">
+            <el-icon class="nav-icon" @click="router.back()">
               <ArrowLeft />
             </el-icon>
             <el-icon class="nav-icon" @click="goHome">
@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Sidebar from '@/components/Sidebar.vue'
@@ -90,7 +90,7 @@ const pageTitleMap = {
   'ApplicationManagement': '应用管理',
   'BusinessConfiguration': '业务配置',
   'UserSubscription': '用户订购关系',
-  'SceneConfiguration': '场景配置',
+  'SceneConfiguration': '业务场景定制',
   'CDRList': 'CDR管理',
   'LogList': '日志管控',
   'DataMonitor': '数据监控',
@@ -144,15 +144,11 @@ const closeTab = (tabPath) => {
 
 const closeOtherTabs = () => {
   const current = tabs.value.find(t => t.path === activeTab.value)
-  const dashboard = tabs.value.find(t => t.path === '/dashboard')
-  tabs.value = [dashboard, current].filter(Boolean)
-  // deduplicate
-  const seen = new Set()
-  tabs.value = tabs.value.filter(t => {
-    if (seen.has(t.path)) return false
-    seen.add(t.path)
-    return true
-  })
+  const hasDashboard = tabs.value.some(t => t.path === '/dashboard')
+  tabs.value = [
+    ...(hasDashboard ? [{ path: '/dashboard', title: pageTitleMap['Dashboard'] }] : []),
+    ...(current && current.path !== '/dashboard' ? [current] : [])
+  ]
 }
 
 const closeAllTabs = () => {
@@ -167,7 +163,11 @@ const contextMenuPos = ref({ x: 0, y: 0 })
 const openContextMenu = (e, tab) => {
   e.preventDefault()
   contextMenuTab.value = tab
-  contextMenuPos.value = { x: e.clientX, y: e.clientY }
+  const menuWidth = 150
+  const menuHeight = 120
+  const x = Math.min(e.clientX, window.innerWidth - menuWidth)
+  const y = Math.min(e.clientY, window.innerHeight - menuHeight)
+  contextMenuPos.value = { x: Math.max(0, x), y: Math.max(0, y) }
   showContextMenu.value = true
 }
 
@@ -176,15 +176,24 @@ const closeContextMenu = () => {
   contextMenuTab.value = null
 }
 
+const handleKeydown = (e) => {
+  if (e.key === 'Escape') closeContextMenu()
+}
+
+onMounted(() => document.addEventListener('keydown', handleKeydown))
+onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
+
 const handleContextCommand = (command) => {
-  if (!contextMenuTab.value) return
+  const targetTab = contextMenuTab.value || tabs.value.find(t => t.path === activeTab.value)
   switch (command) {
     case 'current':
-      closeTab(contextMenuTab.value.path)
+      if (targetTab) closeTab(targetTab.path)
       break
     case 'others':
-      activeTab.value = contextMenuTab.value.path
-      closeOtherTabs()
+      if (targetTab) {
+        activeTab.value = targetTab.path
+        closeOtherTabs()
+      }
       break
     case 'all':
       closeAllTabs()
@@ -349,7 +358,6 @@ const handleContextCommand = (command) => {
   flex: 1;
   overflow: auto;
   padding: 20px;
-  height: 87vh;
 }
 
 .context-menu-overlay {
