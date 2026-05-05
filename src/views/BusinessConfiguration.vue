@@ -74,10 +74,7 @@
         </el-table-column>
       </el-table>
       
-      <div class="pagination-wrapper">
-        <span>共360条</span>
-        <el-pagination background layout="prev, pager, next, jumper, sizes" :total="360" />
-      </div>
+      <UnifiedPagination :total="360" />
     </div>
 
     <ConfigDialog ref="configDialogRef" @refresh="fetchData" />
@@ -93,6 +90,7 @@ import { ElMessage } from 'element-plus'
 import ConfigDialog from '@/components/ConfigDialog.vue'
 import AuditDetailDialog from '@/components/AuditDetailDialog.vue'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog.vue'
+import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 
 const searchForm = reactive({ code: '', status: '', audit: '', available: '', appName: '' })
 const tableData = ref([
@@ -193,16 +191,6 @@ const handleDeleteConfirm = (isBatch) => {
       color: #333;
       .text-green { color: #67c23a; }
     }
-  }
-
-  .pagination-wrapper {
-    margin-top: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    color: #606266;
-    font-size: 13px;
   }
 }
 </style>
