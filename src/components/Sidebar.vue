@@ -9,11 +9,6 @@
       text-color="#333333"
       active-text-color="#2196f3"
     >
-      <el-menu-item index="/dashboard">
-        <el-icon><DataLine /></el-icon>
-        <template #title>CDR数据统计</template>
-      </el-menu-item>
-
       <el-sub-menu v-for="menu in menuList" :key="menu.path" :index="menu.path">
         <template #title>
           <el-icon><component :is="menu.icon" /></el-icon>
