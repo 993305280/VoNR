@@ -154,9 +154,9 @@ function refreshCaptcha() {
   form.captcha = ''
 }
 
-async function handleLogin() {
+function handleLogin() {
   if (!formRef.value) return
-  await formRef.value.validate((valid) => {
+  formRef.value.validate((valid) => {
     if (!valid) return
     doLogin()
   })
