@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(npm *)",
+      "Bash(git *)",
+      "Bash(npm install *)",
+      "Bash(npx tailwindcss *)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(claude mcp *)",
+      "Bash(npx chrome-devtools-mcp@latest --help)",
+      "Bash(chrome-devtools status *)",
+      "Bash(npx chrome-devtools-mcp@latest status)",
+      "Bash(npx chrome-devtools-mcp@latest list_pages)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__click",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(node -e \"import\\('./src/router/index.js'\\).then\\(\\(\\) => console.log\\('OK'\\)\\).catch\\(e => console.error\\(e.message\\)\\)\")",
+      "Bash(curl -s http://localhost:3001/login)",
+      "Bash(npx vite *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(curl * | bash)",
+      "Read(./.env*)",
+      "Read(./**/secrets/**)"
+    ]
+  },
+  "security": {
+    "sandbox": true,
+    "prompt_injection_protection": true
+  }
+}
