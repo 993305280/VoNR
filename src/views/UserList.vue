@@ -102,19 +102,7 @@
         </el-table-column>
       </el-table>
 
-      <!-- 分页 -->
-      <div class="flex justify-center items-center mt-8 pb-8">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, prev, pager, next, jumper, sizes"
-          :total="360"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          class="custom-pagination"
-        />
-      </div>
+      <UnifiedPagination :total="360" />
     </div>
 
     <!-- 新增/编辑订购对话框 -->
@@ -179,6 +167,7 @@
 <script setup>
 import { ref, reactive, nextTick } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
+import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import { ElMessage } from 'element-plus'
 
 // 搜索表单数据
@@ -291,8 +280,6 @@ const tableData = ref([
   }
 ])
 
-const currentPage = ref(1)
-const pageSize = ref(10)
 const multipleSelection = ref([])
 
 // 对话框相关
@@ -454,14 +441,6 @@ const resetForm = () => {
     formRef.value?.clearValidate()
   })
 }
-
-const handleSizeChange = (val) => {
-  pageSize.value = val
-}
-
-const handleCurrentChange = (val) => {
-  currentPage.value = val
-}
 </script>
 
 <style scoped>
@@ -499,34 +478,6 @@ const handleCurrentChange = (val) => {
 
 .custom-table :deep(.el-table__row td) {
   padding: 12px 0;
-}
-
-/* 分页样式定制 */
-.custom-pagination :deep(.el-pagination__total) {
-  margin-right: 24px;
-}
-
-.custom-pagination :deep(.el-pager li) {
-  background: #f4f4f5;
-  margin: 0 4px;
-  border-radius: 4px;
-  min-width: 32px;
-}
-
-.custom-pagination :deep(.el-pager li.is-active) {
-  background-color: #2196f3 !important;
-  color: #fff;
-}
-
-.custom-pagination :deep(.btn-prev),
-.custom-pagination :deep(.btn-next) {
-  background: #f4f4f5;
-  border-radius: 4px;
-  margin: 0 4px;
-}
-
-.custom-pagination :deep(.el-input__inner) {
-  text-align: center;
 }
 
 /* Popover 样式 */
