@@ -28,13 +28,7 @@
       @selection-change="handleSelectionChange"
     />
 
-    <CustomPagination
-      :total="total"
-      :current="pagination.current"
-      :page-size="pagination.pageSize"
-      @page-change="handlePageChange"
-      @size-change="handlePageSizeChange"
-    />
+    <UnifiedPagination :total="360" />
 
     <ApplicationModal
       v-model:visible="modalVisible"
@@ -58,7 +52,7 @@ import { Refresh, Plus, Delete } from '@element-plus/icons-vue'
 import { useApplicationData } from '@/composables/useApplicationData'
 import SearchForm from '@/components/application/SearchForm.vue'
 import ApplicationTable from '@/components/application/ApplicationTable.vue'
-import CustomPagination from '@/components/application/CustomPagination.vue'
+import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import ApplicationModal from '@/components/application/ApplicationModal.vue'
 import DeleteConfirmDialog from '@/components/application/DeleteConfirmDialog.vue'
 
