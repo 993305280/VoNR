@@ -16,7 +16,7 @@
             <el-icon class="nav-icon" @click="router.back()">
               <ArrowLeft />
             </el-icon>
-            <el-icon class="nav-icon" @click="goHome">
+            <el-icon class="nav-icon" :class="{ active: isHome }" @click="goHome">
               <HomeFilled />
             </el-icon>
           </div>
@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Sidebar from '@/components/Sidebar.vue'
@@ -82,6 +82,7 @@ import { Menu, ArrowLeft, HomeFilled, Expand, Close } from '@element-plus/icons-
 
 const router = useRouter()
 const route = useRoute()
+const isHome = computed(() => route.path === '/dashboard')
 const sidebarCollapsed = ref(false)
 
 const pageTitleMap = {
@@ -102,14 +103,12 @@ const pageTitleMap = {
   'AnalysisRanking': '排名分析'
 }
 
-const tabs = ref([
-  { path: '/dashboard', title: pageTitleMap['Dashboard'] }
-])
+const tabs = ref([])
 const activeTab = ref('/dashboard')
 
 watch(() => route.path, (newPath) => {
   activeTab.value = newPath
-  if (!tabs.value.find(t => t.path === newPath)) {
+  if (newPath !== '/dashboard' && !tabs.value.find(t => t.path === newPath)) {
     tabs.value.push({ path: newPath, title: pageTitleMap[route.name] || '未知页面' })
   }
 }, { immediate: true })
@@ -265,6 +264,10 @@ const handleContextCommand = (command) => {
 }
 
 .nav-icon:hover {
+  color: #2196f3;
+}
+
+.nav-icon.active {
   color: #2196f3;
 }
 
