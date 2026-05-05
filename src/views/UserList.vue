@@ -1,5 +1,5 @@
 <template>
-  <div class="user-subscription p-6 bg-white min-h-screen">
+  <div class="user-subscription p-6 bg-white">
     <!-- 顶部标题和操作按钮 -->
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-medium text-gray-800">用户订购关系</h2>
