@@ -361,6 +361,7 @@ const handleContextCommand = (command) => {
   flex: 1;
   overflow: auto;
   padding: 20px;
+  min-height: 0;
 }
 
 .context-menu-overlay {
