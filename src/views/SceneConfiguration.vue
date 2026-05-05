@@ -104,7 +104,7 @@ const tableData = ref([]) // 初始为空，对应图中空白状态
 .page-container {
   padding: 24px;
   background-color: #fff;
-  min-height: 100vh;
+  min-height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 
   .page-title {
