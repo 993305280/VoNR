@@ -82,14 +82,7 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-wrapper">
-        <el-pagination
-          layout="total, prev, pager, next, jumper, sizes"
-          :total="360"
-          :page-sizes="[10, 20, 50]"
-          v-model:current-page="currentPage"
-        />
-      </div>
+      <UnifiedPagination :total="360" />
     </div>
 
     <el-dialog
@@ -157,9 +150,9 @@
 import { ref, reactive, computed } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
+import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 
 const currentTab = ref('图片')
-const currentPage = ref(1)
 const dialogVisible = ref(false)
 const dialogMode = ref('add') // add, edit, preview, delete
 
@@ -293,12 +286,6 @@ const handleConfirm = () => {
 .text-green { color: #67c23a; }
 .text-gray { color: #909399; }
 
-/* 分页 */
-.pagination-wrapper {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
 
 /* 弹窗内部样式 */
 .upload-area {
