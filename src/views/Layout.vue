@@ -19,10 +19,24 @@
             <el-icon class="nav-icon" @click="goHome">
               <HomeFilled />
             </el-icon>
-            <span class="page-title">{{ currentPageTitle }}</span>
+          </div>
+          <div class="nav-tabs">
+            <div
+              v-for="tab in tabs"
+              :key="tab.path"
+              class="nav-tab"
+              :class="{ active: tab.path === activeTab }"
+              @click="handleTabClick(tab)"
+              @contextmenu="openContextMenu($event, tab)"
+            >
+              <span class="tab-title">{{ tab.title }}</span>
+              <el-icon class="tab-close" @click.stop="closeTab(tab.path)">
+                <Close />
+              </el-icon>
+            </div>
           </div>
           <div class="nav-right">
-            <el-dropdown trigger="click" @command="handleTabCommand">
+            <el-dropdown trigger="click" @command="handleContextCommand">
               <div class="tab-menu">
                 <el-icon><Expand /></el-icon>
                 <el-icon><Close /></el-icon>
@@ -37,8 +51,22 @@
             </el-dropdown>
           </div>
         </div>
+
+        <div v-if="showContextMenu" class="context-menu-overlay" @click="closeContextMenu">
+          <div
+            class="context-menu"
+            :style="{ left: contextMenuPos.x + 'px', top: contextMenuPos.y + 'px' }"
+          >
+            <div class="context-menu-item" @click="handleContextCommand('current')">关闭当前标签页</div>
+            <div class="context-menu-item" @click="handleContextCommand('others')">关闭其他标签页</div>
+            <div class="context-menu-item" @click="handleContextCommand('all')">关闭全部标签页</div>
+          </div>
+        </div>
+
         <div class="content-area">
-          <router-view />
+          <keep-alive>
+            <router-view />
+          </keep-alive>
         </div>
       </div>
     </div>
@@ -46,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Sidebar from '@/components/Sidebar.vue'
@@ -59,22 +87,32 @@ const sidebarCollapsed = ref(false)
 const pageTitleMap = {
   'Dashboard': 'CDR数据统计',
   'SystemOverview': '素材库列表',
-  'BusinessList': '业务列表',
-  'UserList': '用户列表',
-  'CDRList': 'CDR列表',
-  'LogList': '日志列表',
+  'ApplicationManagement': '应用管理',
+  'BusinessConfiguration': '业务配置',
+  'UserSubscription': '用户订购关系',
+  'SceneConfiguration': '场景配置',
+  'CDRList': 'CDR管理',
+  'LogList': '日志管控',
   'DataMonitor': '数据监控',
-  'RealtimeCall': '实时呼叫',
-  'RealtimeService': '实时服务',
-  'HistoryCall': '历史呼叫',
-  'HistoryService': '历史服务',
+  'RealtimeCall': '呼叫监控',
+  'RealtimeService': '服务监控',
+  'HistoryCall': '呼叫历史',
+  'HistoryService': '服务历史',
   'AnalysisTrend': '趋势分析',
   'AnalysisRanking': '排名分析'
 }
 
-const currentPageTitle = computed(() => {
-  return pageTitleMap[route.name] || 'CDR管理平台'
-})
+const tabs = ref([
+  { path: '/dashboard', title: pageTitleMap['Dashboard'] }
+])
+const activeTab = ref('/dashboard')
+
+watch(() => route.path, (newPath) => {
+  activeTab.value = newPath
+  if (!tabs.value.find(t => t.path === newPath)) {
+    tabs.value.push({ path: newPath, title: pageTitleMap[route.name] || '未知页面' })
+  }
+}, { immediate: true })
 
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
@@ -84,18 +122,75 @@ const goHome = () => {
   router.push('/dashboard')
 }
 
-const handleTabCommand = (command) => {
+const handleTabClick = (tab) => {
+  router.push(tab.path)
+}
+
+const closeTab = (tabPath) => {
+  const index = tabs.value.findIndex(t => t.path === tabPath)
+  if (index === -1) return
+
+  tabs.value.splice(index, 1)
+
+  if (tabPath === activeTab.value) {
+    if (tabs.value.length === 0) {
+      router.push('/dashboard')
+    } else {
+      const newIndex = Math.min(index, tabs.value.length - 1)
+      router.push(tabs.value[newIndex].path)
+    }
+  }
+}
+
+const closeOtherTabs = () => {
+  const current = tabs.value.find(t => t.path === activeTab.value)
+  const dashboard = tabs.value.find(t => t.path === '/dashboard')
+  tabs.value = [dashboard, current].filter(Boolean)
+  // deduplicate
+  const seen = new Set()
+  tabs.value = tabs.value.filter(t => {
+    if (seen.has(t.path)) return false
+    seen.add(t.path)
+    return true
+  })
+}
+
+const closeAllTabs = () => {
+  tabs.value = []
+  router.push('/dashboard')
+}
+
+const contextMenuTab = ref(null)
+const showContextMenu = ref(false)
+const contextMenuPos = ref({ x: 0, y: 0 })
+
+const openContextMenu = (e, tab) => {
+  e.preventDefault()
+  contextMenuTab.value = tab
+  contextMenuPos.value = { x: e.clientX, y: e.clientY }
+  showContextMenu.value = true
+}
+
+const closeContextMenu = () => {
+  showContextMenu.value = false
+  contextMenuTab.value = null
+}
+
+const handleContextCommand = (command) => {
+  if (!contextMenuTab.value) return
   switch (command) {
     case 'current':
-      console.log('Close current tab')
+      closeTab(contextMenuTab.value.path)
       break
     case 'others':
-      console.log('Close other tabs')
+      activeTab.value = contextMenuTab.value.path
+      closeOtherTabs()
       break
     case 'all':
-      console.log('Close all tabs')
+      closeAllTabs()
       break
   }
+  closeContextMenu()
 }
 </script>
 
@@ -140,9 +235,8 @@ const handleTabCommand = (command) => {
   height: 50px;
   background: #ffffff;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 12px;
   border-bottom: 1px solid #e4e7ed;
   flex-shrink: 0;
 }
@@ -151,6 +245,7 @@ const handleTabCommand = (command) => {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .nav-icon {
@@ -164,15 +259,71 @@ const handleTabCommand = (command) => {
   color: #2196f3;
 }
 
-.page-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333333;
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow-x: auto;
+  margin-left: 12px;
+  gap: 4px;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  height: 0;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+  color: #666666;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-tab:hover {
+  color: #2196f3;
+  border-color: #bbd4f1;
+}
+
+.nav-tab.active {
+  color: #ffffff;
+  background: #2196f3;
+  border-color: #2196f3;
+}
+
+.tab-title {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-close {
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.nav-tab:hover .tab-close,
+.nav-tab.active .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  color: #f56c6c;
 }
 
 .nav-right {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .tab-menu {
@@ -199,5 +350,37 @@ const handleTabCommand = (command) => {
   overflow: auto;
   padding: 20px;
   height: 87vh;
+}
+
+.context-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.context-menu {
+  position: fixed;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  min-width: 150px;
+  z-index: 1000;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #333333;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.context-menu-item:hover {
+  background: #f5f7fa;
+  color: #2196f3;
 }
 </style>
