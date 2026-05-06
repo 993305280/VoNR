@@ -15,6 +15,8 @@ import CDRDetail from '@/views/CDRDetail.vue'
 import CallRecords from '@/views/CallRecords.vue'
 import LogList from '@/views/LogList.vue'
 import DataMonitor from '@/views/DataMonitor.vue'
+import CallCountStats from '@/views/CallCountStats.vue'
+import ServiceCountStats from '@/views/ServiceCountStats.vue'
 
 const routes = [
   {
@@ -83,38 +85,18 @@ const routes = [
         component: LogList
       },
       {
-        path: 'data/monitor',
-        name: 'DataMonitor',
-        component: DataMonitor
+        path: 'data/statistics/call-count',
+        name: 'CallCountStats',
+        component: CallCountStats
       },
       {
-        path: 'data/realtime/call',
-        name: 'RealtimeCall',
-        component: DataMonitor
+        path: 'data/statistics/service-count',
+        name: 'ServiceCountStats',
+        component: ServiceCountStats
       },
       {
-        path: 'data/realtime/service',
-        name: 'RealtimeService',
-        component: DataMonitor
-      },
-      {
-        path: 'data/history/call',
-        name: 'HistoryCall',
-        component: DataMonitor
-      },
-      {
-        path: 'data/history/service',
-        name: 'HistoryService',
-        component: DataMonitor
-      },
-      {
-        path: 'data/analysis/trend',
-        name: 'AnalysisTrend',
-        component: DataMonitor
-      },
-      {
-        path: 'data/analysis/ranking',
-        name: 'AnalysisRanking',
+        path: 'data/statistics/user-count',
+        name: 'UserCountStats',
         component: DataMonitor
       }
     ]
