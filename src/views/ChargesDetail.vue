@@ -1,19 +1,19 @@
 <template>
-  <div class="charges-detail h-full flex flex-col bg-white">
+  <div class="charges-detail">
     <!-- 顶部标题和操作按钮 -->
-    <div class="flex justify-between items-center px-6 pt-6 pb-4">
-      <h2 class="text-lg font-medium text-[#333333]">费用明细</h2>
+    <div class="page-header">
+      <h2 class="page-title">费用明细</h2>
       <el-button type="primary" :icon="Refresh" class="action-btn" @click="handleSync">同步费用明细</el-button>
     </div>
 
     <!-- 搜索表单 -->
-    <div class="search-section px-6 pb-6">
-      <el-form :inline="true" :model="searchForm" class="custom-form flex items-center flex-wrap gap-y-4">
+    <div class="search-section">
+      <el-form :inline="true" :model="searchForm" class="custom-form">
         <el-form-item label="用户号码">
-          <el-input v-model="searchForm.userNumber" placeholder="请输入" clearable class="!w-60" />
+          <el-input v-model="searchForm.userNumber" placeholder="请输入" clearable style="width: 150px" />
         </el-form-item>
         <el-form-item label="子业务场景">
-          <el-select v-model="searchForm.subScene" placeholder="全部场景" clearable class="!w-60">
+          <el-select v-model="searchForm.subScene" placeholder="全部场景" clearable style="width: 150px">
             <el-option label="全部场景" value="" />
             <el-option label="001001虚拟背景" value="001001虚拟背景" />
             <el-option label="001002美颜滤镜" value="001002美颜滤镜" />
@@ -23,29 +23,29 @@
           </el-select>
         </el-form-item>
         <el-form-item label="服务开始时间">
-          <div class="flex items-center gap-2">
-            <el-date-picker v-model="searchForm.startTimeFrom" type="datetime" placeholder="开始时间" class="!w-[180px]" />
-            <span class="text-gray-500">至</span>
-            <el-date-picker v-model="searchForm.startTimeTo" type="datetime" placeholder="结束时间" class="!w-[180px]" />
+          <div class="time-range">
+            <el-date-picker v-model="searchForm.startTimeFrom" type="datetime" placeholder="开始时间" style="width: 170px" />
+            <span class="time-separator">至</span>
+            <el-date-picker v-model="searchForm.startTimeTo" type="datetime" placeholder="结束时间" style="width: 170px" />
           </div>
         </el-form-item>
         <el-form-item label="服务结束时间">
-          <div class="flex items-center gap-2">
-            <el-date-picker v-model="searchForm.endTimeFrom" type="datetime" placeholder="开始时间" class="!w-[180px]" />
-            <span class="text-gray-500">至</span>
-            <el-date-picker v-model="searchForm.endTimeTo" type="datetime" placeholder="结束时间" class="!w-[180px]" />
+          <div class="time-range">
+            <el-date-picker v-model="searchForm.endTimeFrom" type="datetime" placeholder="开始时间" style="width: 170px" />
+            <span class="time-separator">至</span>
+            <el-date-picker v-model="searchForm.endTimeTo" type="datetime" placeholder="结束时间" style="width: 170px" />
           </div>
         </el-form-item>
-        <el-form-item class="!mr-0 ml-auto">
-          <el-button type="primary" @click="handleSearch" class="px-6 !bg-[#2196f3]">查询</el-button>
-          <el-button @click="handleReset" class="px-6 reset-btn">重置</el-button>
+        <el-form-item class="btn-group">
+          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button @click="handleReset" class="reset-btn">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
 
     <!-- 数据表格 -->
-    <div class="table-section flex-1 min-h-0 flex flex-col px-6 pb-6">
-      <div class="flex-1 min-h-0">
+    <div class="table-section">
+      <div class="table-wrap">
         <el-table
           :data="filteredData"
           height="100%"
@@ -92,7 +92,6 @@ import { Refresh } from '@element-plus/icons-vue'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import { ElMessage } from 'element-plus'
 
-// 搜索表单
 const searchForm = reactive({
   userNumber: '',
   subScene: '',
@@ -102,7 +101,6 @@ const searchForm = reactive({
   endTimeTo: null
 })
 
-// Mock 数据（静态只读，无需响应式）
 const rawData = [
   { transactionId: 'JF05689123', userNumber: '13869421569', callId: 'FW25518064', appId: 'AP25518064', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按时长', unitPrice: 1, totalCost: 8, duration: '07:56', count: null, startTime: '2024-03-25 10:00:00', endTime: '2024-03-25 10:08:00' },
   { transactionId: 'JF81236940', userNumber: '18512489653', callId: 'FW25691240', appId: 'AP25691240', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按次', unitPrice: 5, totalCost: 5, duration: null, count: 1, startTime: '2024-03-24 10:00:00', endTime: '2024-03-25 10:08:00' },
@@ -118,7 +116,6 @@ const rawData = [
   { transactionId: 'JF81236945', userNumber: '18512489653', callId: 'FW25691245', appId: 'AP25691240', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按次', unitPrice: 5, totalCost: 15, duration: null, count: 3, startTime: '2024-03-24 10:00:00', endTime: '2024-03-25 10:08:00' }
 ]
 
-// 搜索过滤
 const filteredData = computed(() => {
   return rawData.filter(item => {
     if (searchForm.userNumber && item.userNumber !== searchForm.userNumber) return false
@@ -143,9 +140,7 @@ const filteredData = computed(() => {
   })
 })
 
-const handleSearch = () => {
-  // 搜索通过 computed 自动过滤
-}
+const handleSearch = () => {}
 
 const handleReset = () => {
   searchForm.userNumber = ''
@@ -162,6 +157,57 @@ const handleSync = () => {
 </script>
 
 <style scoped>
+.charges-detail {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333333;
+}
+
+.search-section {
+  padding: 0 24px 20px;
+}
+
+.search-section :deep(.el-form-item) {
+  margin-bottom: 0;
+  margin-right: 16px;
+}
+
+.search-section :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #333;
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-separator {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.btn-group {
+  margin-left: auto;
+  margin-right: 0;
+}
+
 .action-btn {
   border-radius: 4px;
 }
@@ -177,9 +223,17 @@ const handleSync = () => {
   color: #409eff;
 }
 
-.custom-form :deep(.el-form-item__label) {
-  font-weight: 500;
-  color: #333;
+.table-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px 20px;
+}
+
+.table-wrap {
+  flex: 1;
+  min-height: 0;
 }
 
 .custom-table :deep(.el-table__header-wrapper th) {
