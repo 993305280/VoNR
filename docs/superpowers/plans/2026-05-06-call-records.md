@@ -1,3 +1,23 @@
+# 通话记录页面实现计划
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** 实现通话记录页面（`/cdr/calls`），包含搜索筛选、数据表格和分页，遵循 CDRDetail.vue 现有模式。
+
+**Architecture:** 单文件修改 `src/views/CallRecords.vue`，使用 Vue 3 Composition API + Element Plus，复用 `UnifiedPagination` 公共分页组件。搜索行 `flex-wrap: nowrap` 随侧边栏自适应。
+
+**Tech Stack:** Vue 3, Element Plus, UnifiedPagination, scoped CSS
+
+---
+
+### Task 1: 实现 CallRecords.vue
+
+**Files:**
+- Modify: `src/views/CallRecords.vue`
+
+- [ ] **Step 1: 写入完整组件代码**
+
+```vue
 <template>
   <div class="call-records">
     <div class="page-header">
@@ -73,14 +93,14 @@ const searchForm = reactive({
 
 const rawData = [
   { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
+  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
+  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
+  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
+  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
+  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
+  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
   { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
   { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
-  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
-  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
-  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
-  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
-  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
-  { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '上行', callType: '音频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' },
   { callId: 'FW25518064', callerNumber: '13869421569', calleeNumber: '18562039456', appId: 'AP12845121', callDirection: '下行', callType: '视频', startTime: '2024-03-25 10:08:00', endTime: '2024-03-25 10:09:20' }
 ]
 
@@ -88,8 +108,8 @@ const filteredData = ref([...rawData])
 
 const handleSearch = () => {
   filteredData.value = rawData.filter(item => {
-    if (searchForm.callerNumber && !item.callerNumber.includes(searchForm.callerNumber)) return false
-    if (searchForm.calleeNumber && !item.calleeNumber.includes(searchForm.calleeNumber)) return false
+    if (searchForm.callerNumber && item.callerNumber !== searchForm.callerNumber) return false
+    if (searchForm.calleeNumber && item.calleeNumber !== searchForm.calleeNumber) return false
     if (searchForm.startTimeFrom) {
       const itemTime = new Date(item.startTime)
       if (itemTime < searchForm.startTimeFrom) return false
@@ -237,3 +257,24 @@ const handleReset = () => {
   padding: 12px 0;
 }
 </style>
+```
+
+- [ ] **Step 2: 启动开发服务器验证**
+
+Run: `npm run dev`
+Expected: 页面正常加载，搜索栏所有条件在同一行，表格显示 10 条 mock 数据，分页显示"共360条"
+
+- [ ] **Step 3: 验证侧边栏收缩响应**
+
+点击侧边栏折叠按钮，确认搜索行和表格跟随内容区宽度变化自适应。
+
+- [ ] **Step 4: 验证搜索和重置功能**
+
+在主叫号码输入 `13869421569` 后点击查询，确认只显示匹配数据；点击重置，确认恢复全部数据。
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/views/CallRecords.vue docs/superpowers/specs/2026-05-06-call-records-design.md docs/superpowers/plans/2026-05-06-call-records.md
+git commit -m "feat: implement call records page with search, table, and pagination"
+```
