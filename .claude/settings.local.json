@@ -24,7 +24,15 @@
       "Bash(git diff *)",
       "Bash(node -e \"import\\('./src/router/index.js'\\).then\\(\\(\\) => console.log\\('OK'\\)\\).catch\\(e => console.error\\(e.message\\)\\)\")",
       "Bash(curl -s http://localhost:3001/login)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(ls \"C:\\\\Users\\\\hxf\\\\.claude\\\\memory\" 2>/dev/null || echo \"no global memory dir\")",
+      "Read(//c/Users/hxf/.claude/**)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s http://localhost:5173/cdr/charges)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/cdr/charges)",
+      "Bash(code --list-extensions)",
+      "Bash(npx vue-tsc *)",
+      "Bash(curl -s http://localhost:5173/src/views/LogList.vue)"
     ],
     "deny": [
       "Bash(rm -rf *)",

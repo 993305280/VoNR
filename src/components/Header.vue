@@ -29,6 +29,7 @@ const handleLogout = () => {
     cancelButtonText: '取消'
   }).then(() => {
     authStore.logout()
+    sessionStorage.removeItem('voNR_tabs')
     router.push('/login')
   }).catch(() => {})
 }

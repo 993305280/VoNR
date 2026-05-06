@@ -149,6 +149,7 @@ const handleReset = () => {
   searchForm.startTimeTo = null
   searchForm.endTimeFrom = null
   searchForm.endTimeTo = null
+  handleSearch()
 }
 
 const handleSync = () => {

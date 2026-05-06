@@ -96,14 +96,10 @@ const pageTitleMap = {
   'ChargesDetail': '费用明细',
   'CDRDetail': 'CDR明细',
   'CallRecords': '通话记录',
-  'LogList': '日志管控',
-  'DataMonitor': '数据监控',
-  'RealtimeCall': '呼叫监控',
-  'RealtimeService': '服务监控',
-  'HistoryCall': '呼叫历史',
-  'HistoryService': '服务历史',
-  'AnalysisTrend': '趋势分析',
-  'AnalysisRanking': '排名分析'
+  'LogList': '操作日志',
+  'CallCountStats': '呼叫记录数量统计',
+  'ServiceCountStats': '服务人次统计',
+  'UserCountStats': '服务用户数统计'
 }
 
 const tabs = ref([])
@@ -192,12 +188,10 @@ onMounted(() => {
   if (savedTabs) {
     tabs.value = JSON.parse(savedTabs)
   } else {
-    tabs.value = [{ path: '/dashboard', title: pageTitleMap['Dashboard'] }]
+    tabs.value = []
   }
-  // 确保 Dashboard 始终存在
-  if (!tabs.value.find(t => t.path === '/dashboard')) {
-    tabs.value.unshift({ path: '/dashboard', title: pageTitleMap['Dashboard'] })
-  }
+  // 确保不包含 Dashboard（已由 HomeFilled 图标替代）
+  tabs.value = tabs.value.filter(t => t.path !== '/dashboard')
   document.addEventListener('keydown', handleKeydown)
 })
 onUnmounted(() => document.removeEventListener('keydown', handleKeydown))

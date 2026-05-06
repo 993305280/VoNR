@@ -104,7 +104,7 @@ const menuList = [
     title: '日志管控',
     icon: Files,
     children: [
-      { path: '/log/list', title: '日志管控' }
+      { path: '/log/list', title: '操作日志' }
     ]
   },
   {
@@ -114,27 +114,12 @@ const menuList = [
     children: [],
     subMenus: [
       {
-        path: '/data/realtime',
-        title: '实时监控',
+        path: '/data/statistics',
+        title: '业务统计',
         children: [
-          { path: '/data/realtime/call', title: '呼叫监控' },
-          { path: '/data/realtime/service', title: '服务监控' }
-        ]
-      },
-      {
-        path: '/data/history',
-        title: '历史数据',
-        children: [
-          { path: '/data/history/call', title: '呼叫历史' },
-          { path: '/data/history/service', title: '服务历史' }
-        ]
-      },
-      {
-        path: '/data/analysis',
-        title: '数据分析',
-        children: [
-          { path: '/data/analysis/trend', title: '趋势分析' },
-          { path: '/data/analysis/ranking', title: '排名分析' }
+          { path: '/data/statistics/call-count', title: '呼叫记录数量统计' },
+          { path: '/data/statistics/service-count', title: '服务人次统计' },
+          { path: '/data/statistics/user-count', title: '服务用户数统计' }
         ]
       }
     ]

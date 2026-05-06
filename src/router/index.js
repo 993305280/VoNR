@@ -17,6 +17,7 @@ import LogList from '@/views/LogList.vue'
 import DataMonitor from '@/views/DataMonitor.vue'
 import CallCountStats from '@/views/CallCountStats.vue'
 import ServiceCountStats from '@/views/ServiceCountStats.vue'
+import UserCountStats from '@/views/UserCountStats.vue'
 
 const routes = [
   {
@@ -97,7 +98,7 @@ const routes = [
       {
         path: 'data/statistics/user-count',
         name: 'UserCountStats',
-        component: DataMonitor
+        component: UserCountStats
       }
     ]
   }
