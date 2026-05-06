@@ -83,7 +83,11 @@ import { Menu, ArrowLeft, HomeFilled, Expand, Close } from '@element-plus/icons-
 const router = useRouter()
 const route = useRoute()
 const isHome = computed(() => route.path === '/dashboard')
-const sidebarCollapsed = ref(false)
+const sidebarCollapsed = ref(sessionStorage.getItem('voNR_sidebarCollapsed') === 'true')
+
+watch(sidebarCollapsed, (val) => {
+  sessionStorage.setItem('voNR_sidebarCollapsed', val)
+})
 
 const pageTitleMap = {
   'Dashboard': 'CDR数据统计',

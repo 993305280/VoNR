@@ -319,6 +319,9 @@ const resetForm = () => {
 </script>
 
 <style scoped>
+.billing-package {
+  padding: 13px 20px 0px;
+}
 .action-btn {
   border-radius: 4px;
 }

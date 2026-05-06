@@ -1,5 +1,10 @@
 <template>
-  <div class="sidebar" :class="{ collapsed }">
+  <div
+    class="sidebar"
+    :class="{ collapsed, collapsing: isCollapsing, expanding: isExpanding }"
+    @transitionstart="onTransitionStart"
+    @transitionend="onTransitionEnd"
+  >
     <el-menu
       :default-active="activeMenu"
       :default-openeds="defaultOpeneds"
@@ -40,7 +45,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   DataLine,
@@ -51,12 +56,32 @@ import {
   TrendCharts
 } from '@element-plus/icons-vue'
 
-defineProps({
+const props = defineProps({
   collapsed: {
     type: Boolean,
     default: false
   }
 })
+
+const isCollapsing = ref(false)
+const isExpanding = ref(false)
+
+const onTransitionStart = (e) => {
+  if (e.propertyName === 'width') {
+    if (props.collapsed) {
+      isCollapsing.value = true
+    } else {
+      isExpanding.value = true
+    }
+  }
+}
+
+const onTransitionEnd = (e) => {
+  if (e.propertyName === 'width') {
+    isCollapsing.value = false
+    isExpanding.value = false
+  }
+}
 
 const route = useRoute()
 const activeMenu = computed(() => route.path)
@@ -159,10 +184,26 @@ const defaultOpeneds = computed(() => {
   border-right: none;
 }
 
-.sidebar :deep(.el-menu-item),
 .sidebar :deep(.el-sub-menu__title) {
   height: 50px;
   line-height: 50px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.sidebar :deep(.el-menu-item) {
+  height: 50px;
+  line-height: 50px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.sidebar :deep(.el-sub-menu .el-sub-menu .el-sub-menu__title) {
+  font-size: 14px;
+}
+
+.sidebar :deep(.el-sub-menu .el-sub-menu .el-menu-item) {
+  font-size: 14px;
 }
 
 .sidebar :deep(.el-sub-menu .el-menu-item) {
@@ -180,6 +221,56 @@ const defaultOpeneds = computed(() => {
   min-width: 180px;
 }
 
+/* 子菜单激活时，父级菜单高亮 */
+.sidebar :deep(.el-menu-item.is-active) {
+  background-color: #ecf5ff !important;
+  color: #2196f3 !important;
+}
+
+.sidebar :deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
+  color: #2196f3 !important;
+}
+
+.sidebar :deep(.el-sub-menu.is-opened > .el-sub-menu__title .el-icon) {
+  color: #2196f3 !important;
+}
+
+/* 鼠标悬停背景色与选中一致 */
+.sidebar :deep(.el-menu-item:hover),
+.sidebar :deep(.el-sub-menu__title:hover) {
+  background-color: #ecf5ff !important;
+}
+
+/* 隐藏默认箭头图标 */
+.sidebar :deep(.el-sub-menu__title .el-sub-menu__icon-arrow) {
+  display: none !important;
+}
+
+/* 使用三角形替代箭头 */
+.sidebar :deep(.el-sub-menu__title) {
+  position: relative;
+  padding-right: 30px !important;
+}
+
+.sidebar :deep(.el-sub-menu__title::after) {
+  content: '';
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #999;
+  transition: transform 0.3s ease;
+}
+
+.sidebar :deep(.el-sub-menu.is-opened > .el-sub-menu__title::after) {
+  transform: translateY(-50%) rotate(180deg);
+  border-top-color: #2196f3;
+}
+
 /* 折叠状态样式 */
 .sidebar.collapsed {
   width: 64px;
@@ -191,6 +282,15 @@ const defaultOpeneds = computed(() => {
 
 .sidebar.collapsed :deep(.el-sub-menu__title span),
 .sidebar.collapsed :deep(.el-menu-item span) {
+  display: none;
+}
+
+.sidebar.collapsing :deep(.el-sub-menu__title::after),
+.sidebar.expanding :deep(.el-sub-menu__title::after) {
+  display: none;
+}
+
+.sidebar.collapsed:not(.collapsing):not(.expanding) :deep(.el-sub-menu__title::after) {
   display: none;
 }
 </style>

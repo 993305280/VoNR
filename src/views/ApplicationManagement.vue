@@ -158,6 +158,8 @@ const handleSave = (data) => {
 <style scoped>
 .application-management {
   min-height: 100%;
+  background-color: #fff;
+  padding: 13px 20px 0px;
 }
 
 .page-header {

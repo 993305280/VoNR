@@ -158,7 +158,7 @@ const handleDeleteConfirm = (isBatch) => {
 <style lang="scss" scoped>
 .business-config-container {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: #fff;
   min-height: 100%;
 
   .header-section {

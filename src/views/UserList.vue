@@ -445,6 +445,7 @@ const resetForm = () => {
 
 <style scoped>
 .user-subscription {
+  padding: 13px 20px 0px;
   /* 移除之前的背景色，使用纯白背景以符合设计图 */
 }
 

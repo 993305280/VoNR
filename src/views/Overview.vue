@@ -222,7 +222,7 @@ const handleConfirm = () => {
 /* 容器布局 */
 .material-manager {
   /* padding: 20px; */
-  background-color: #f5f7fa;
+  background-color: #fff;
   height: 100%;
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <div class="header-left">
-      <h1 class="header-title">CDR管理平台</h1>
+      <h1 class="header-title">交互通话业务平台</h1>
     </div>
     <div class="header-right">
       <div class="user-info">
@@ -30,6 +30,7 @@ const handleLogout = () => {
   }).then(() => {
     authStore.logout()
     sessionStorage.removeItem('voNR_tabs')
+    sessionStorage.removeItem('voNR_sidebarCollapsed')
     router.push('/login')
   }).catch(() => {})
 }
