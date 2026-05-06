@@ -12,7 +12,6 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
 import {
-  TitleComponent,
   TooltipComponent,
   GridComponent,
   LegendComponent,
@@ -22,7 +21,6 @@ import {
 use([
   CanvasRenderer,
   LineChart,
-  TitleComponent,
   TooltipComponent,
   GridComponent,
   LegendComponent,
@@ -45,11 +43,6 @@ const props = defineProps({
   seriesData: {
     type: Object,
     required: true
-  },
-  granularity: {
-    type: String,
-    required: true,
-    validator: (val) => ['hour', 'day', 'month'].includes(val)
   }
 })
 
