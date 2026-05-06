@@ -116,6 +116,10 @@ watch(() => route.path, (newPath) => {
   }
 }, { immediate: true })
 
+watch(tabs, (newTabs) => {
+  sessionStorage.setItem('voNR_tabs', JSON.stringify(newTabs))
+}, { deep: true })
+
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
@@ -182,7 +186,20 @@ const handleKeydown = (e) => {
   if (e.key === 'Escape') closeContextMenu()
 }
 
-onMounted(() => document.addEventListener('keydown', handleKeydown))
+onMounted(() => {
+  // 从 sessionStorage 恢复 tabs
+  const savedTabs = sessionStorage.getItem('voNR_tabs')
+  if (savedTabs) {
+    tabs.value = JSON.parse(savedTabs)
+  } else {
+    tabs.value = [{ path: '/dashboard', title: pageTitleMap['Dashboard'] }]
+  }
+  // 确保 Dashboard 始终存在
+  if (!tabs.value.find(t => t.path === '/dashboard')) {
+    tabs.value.unshift({ path: '/dashboard', title: pageTitleMap['Dashboard'] })
+  }
+  document.addEventListener('keydown', handleKeydown)
+})
 onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
 const handleContextCommand = (command) => {
