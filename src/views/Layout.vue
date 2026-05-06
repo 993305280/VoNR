@@ -11,11 +11,11 @@
         <div class="top-nav">
           <div class="nav-left">
             <el-icon class="nav-icon" @click="toggleSidebar">
-              <Menu />
+              <Expand />
             </el-icon>
-            <el-icon class="nav-icon" @click="router.back()">
+            <!-- <el-icon class="nav-icon" @click="router.back()">
               <ArrowLeft />
-            </el-icon>
+            </el-icon> -->
             <el-icon class="nav-icon" :class="{ active: isHome }" @click="goHome">
               <HomeFilled />
             </el-icon>
@@ -38,7 +38,7 @@
           <div class="nav-right">
             <el-dropdown trigger="click" @command="handleContextCommand">
               <div class="tab-menu">
-                <el-icon><Expand /></el-icon>
+                <!-- <el-icon></el-icon> -->
                 <el-icon><Close /></el-icon>
               </div>
               <template #dropdown>

@@ -2,6 +2,7 @@
   <div class="sidebar" :class="{ collapsed }">
     <el-menu
       :default-active="activeMenu"
+      :default-openeds="defaultOpeneds"
       :unique-opened="true"
       :collapse="collapsed"
       router
@@ -39,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   DataLine,
@@ -58,7 +59,7 @@ defineProps({
 })
 
 const route = useRoute()
-const activeMenu = ref(route.path)
+const activeMenu = computed(() => route.path)
 
 const menuList = [
   {
@@ -92,7 +93,10 @@ const menuList = [
     title: 'CDR管理',
     icon: Document,
     children: [
-      { path: '/cdr/list', title: 'CDR管理' }
+      { path: '/cdr/billing', title: '计费套餐' },
+      { path: '/cdr/charges', title: '费用明细' },
+      { path: '/cdr/detail', title: 'CDR明细' },
+      { path: '/cdr/calls', title: '通话记录' }
     ]
   },
   {
@@ -136,6 +140,26 @@ const menuList = [
     ]
   }
 ]
+
+const defaultOpeneds = computed(() => {
+  const path = route.path
+  const openeds = []
+
+  for (const menu of menuList) {
+    if (path === menu.path || path.startsWith(menu.path + '/')) {
+      openeds.push(menu.path)
+    }
+    if (menu.subMenus) {
+      for (const sub of menu.subMenus) {
+        if (path === sub.path || path.startsWith(sub.path + '/')) {
+          openeds.push(sub.path)
+        }
+      }
+    }
+  }
+
+  return openeds
+})
 </script>
 
 <style scoped>

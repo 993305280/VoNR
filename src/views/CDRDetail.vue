@@ -1,6 +1,6 @@
 <template>
   <div class="page-content">
-    <h2>CDR列表</h2>
+    <h2>CDR明细</h2>
   </div>
 </template>
 

@@ -1,3 +1,31 @@
+# 计费套餐页面 Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** 将 BillingPackage.vue 从占位页替换为完整的计费套餐 CRUD 页面。
+
+**Architecture:** 单文件实现，遵循 UserList.vue 的模式：标题栏 + 搜索区 + 表格 + 分页 + 新增/编辑弹框 + 删除确认弹框。Mock 数据内联硬编码。
+
+**Tech Stack:** Vue 3 `<script setup>`, Element Plus, Tailwind CSS, UnifiedPagination
+
+---
+
+## 文件变更
+
+- **修改:** `src/views/BillingPackage.vue` — 从占位页替换为完整实现
+
+---
+
+### Task 1: 构建模板结构（标题栏 + 搜索区 + 表格）
+
+**Files:**
+- Modify: `src/views/BillingPackage.vue`
+
+- [ ] **Step 1: 替换 BillingPackage.vue 模板和脚本**
+
+将 `src/views/BillingPackage.vue` 的完整内容替换为以下代码：
+
+```vue
 <template>
   <div class="billing-package p-6 bg-white min-h-full">
     <!-- 顶部标题和操作按钮 -->
@@ -60,9 +88,8 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEdit ? '编辑计费套餐' : '新增计费套餐'"
-      width="580px"
+      width="600px"
       :close-on-click-modal="false"
-      class="billing-dialog"
     >
       <el-form
         ref="formRef"
@@ -82,7 +109,7 @@
         </el-form-item>
         <el-form-item label="费用" prop="cost">
           <div class="flex gap-2 w-full">
-            <el-input v-model="formData.cost" placeholder="请输入" class="flex-1" />
+            <el-input-number v-model="formData.cost" :min="0" :precision="2" placeholder="请输入" controls-position="right" class="flex-1" />
             <template v-if="formData.billingType === '按次'">
               <span class="leading-[32px] text-gray-600 whitespace-nowrap">元/次</span>
             </template>
@@ -99,10 +126,10 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="dialog-footer-center">
+        <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
           <el-button type="primary" @click="handleSubmit">保存</el-button>
-        </div>
+        </span>
       </template>
     </el-dialog>
 
@@ -110,18 +137,17 @@
     <el-dialog
       v-model="deleteDialogVisible"
       :title="isBatchDelete ? '批量删除计费' : '删除计费'"
-      width="580px"
-      class="billing-dialog"
+      width="480px"
     >
       <div class="text-center py-4">
         <p class="text-base text-gray-800 mb-3">{{ isBatchDelete ? '是否删除所选计费？' : '是否删除此计费？' }}</p>
         <p class="text-sm text-red-500">{{ isBatchDelete ? '删除后，关联所选计费的业务配置将不再按所选计费方式计费，请谨慎操作！' : '删除后，关联此计费的业务配置将不再按此计费方式计费，请谨慎操作！' }}</p>
       </div>
       <template #footer>
-        <div class="dialog-footer-center">
+        <span class="dialog-footer">
           <el-button @click="deleteDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="confirmDelete">删除</el-button>
-        </div>
+        </span>
       </template>
     </el-dialog>
   </div>
@@ -171,7 +197,7 @@ const formRef = ref()
 const formData = reactive({
   billingName: '',
   billingType: '按次',
-  cost: '',
+  cost: undefined,
   unit: '元/分钟',
   description: ''
 })
@@ -309,7 +335,7 @@ const confirmDelete = () => {
 const resetForm = () => {
   formData.billingName = ''
   formData.billingType = '按次'
-  formData.cost = ''
+  formData.cost = undefined
   formData.unit = '元/分钟'
   formData.description = ''
   nextTick(() => {
@@ -355,18 +381,17 @@ const resetForm = () => {
 .dialog-footer {
   text-align: right;
 }
-
-.dialog-footer-center {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.billing-dialog :deep(.el-dialog) {
-  height: 550px !important;
-}
-
-.billing-dialog :deep(.el-dialog__body) {
-  overflow-y: auto;
-}
 </style>
+```
+
+- [ ] **Step 2: 验证页面加载**
+
+Run: `npm run dev`
+Expected: 浏览器访问 `/cdr/billing`，页面显示计费套餐表格，包含 10 条 mock 数据，搜索、新增、编辑、删除功能均可正常操作。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/views/BillingPackage.vue
+git commit -m "feat: implement billing package CRUD page"
+```

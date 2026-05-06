@@ -3,17 +3,17 @@
     <!-- 顶部标题和操作按钮 -->
     <div class="page-header">
       <h2 class="page-title">费用明细</h2>
-      <el-button type="primary" :icon="Refresh" class="action-btn" @click="handleSync">同步费用明细</el-button>
+      <el-button type="primary" :icon="Refresh" class="action-btn" @click="handleSync">同步调用明细</el-button>
     </div>
 
     <!-- 搜索表单 -->
     <div class="search-section">
-      <el-form :inline="true" :model="searchForm" class="custom-form">
-        <el-form-item label="用户号码">
-          <el-input v-model="searchForm.userNumber" placeholder="请输入" clearable style="width: 150px" />
+      <el-form :model="searchForm" class="custom-form">
+        <el-form-item label="用户号码" class="flex-item">
+          <el-input v-model="searchForm.userNumber" placeholder="请输入" clearable />
         </el-form-item>
-        <el-form-item label="子业务场景">
-          <el-select v-model="searchForm.subScene" placeholder="全部场景" clearable style="width: 150px">
+        <el-form-item label="子业务场景" class="flex-item">
+          <el-select v-model="searchForm.subScene" placeholder="全部场景" clearable>
             <el-option label="全部场景" value="" />
             <el-option label="001001虚拟背景" value="001001虚拟背景" />
             <el-option label="001002美颜滤镜" value="001002美颜滤镜" />
@@ -22,18 +22,18 @@
             <el-option label="003001语音留言" value="003001语音留言" />
           </el-select>
         </el-form-item>
-        <el-form-item label="服务开始时间">
+        <el-form-item label="服务开始时间" class="flex-item time-item">
           <div class="time-range">
-            <el-date-picker v-model="searchForm.startTimeFrom" type="datetime" placeholder="开始时间" style="width: 170px" />
+            <el-date-picker v-model="searchForm.startTimeFrom" type="datetime" placeholder="开始时间" />
             <span class="time-separator">至</span>
-            <el-date-picker v-model="searchForm.startTimeTo" type="datetime" placeholder="结束时间" style="width: 170px" />
+            <el-date-picker v-model="searchForm.startTimeTo" type="datetime" placeholder="结束时间" />
           </div>
         </el-form-item>
-        <el-form-item label="服务结束时间">
+        <el-form-item label="服务结束时间" class="flex-item time-item">
           <div class="time-range">
-            <el-date-picker v-model="searchForm.endTimeFrom" type="datetime" placeholder="开始时间" style="width: 170px" />
+            <el-date-picker v-model="searchForm.endTimeFrom" type="datetime" placeholder="开始时间" />
             <span class="time-separator">至</span>
-            <el-date-picker v-model="searchForm.endTimeTo" type="datetime" placeholder="结束时间" style="width: 170px" />
+            <el-date-picker v-model="searchForm.endTimeTo" type="datetime" placeholder="结束时间" />
           </div>
         </el-form-item>
         <el-form-item class="btn-group">
@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, ref } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import { ElMessage } from 'element-plus'
@@ -116,8 +116,10 @@ const rawData = [
   { transactionId: 'JF81236945', userNumber: '18512489653', callId: 'FW25691245', appId: 'AP25691240', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按次', unitPrice: 5, totalCost: 15, duration: null, count: 3, startTime: '2024-03-24 10:00:00', endTime: '2024-03-25 10:08:00' }
 ]
 
-const filteredData = computed(() => {
-  return rawData.filter(item => {
+const filteredData = ref([...rawData])
+
+const handleSearch = () => {
+  filteredData.value = rawData.filter(item => {
     if (searchForm.userNumber && item.userNumber !== searchForm.userNumber) return false
     if (searchForm.subScene && item.subScene !== searchForm.subScene) return false
     if (searchForm.startTimeFrom) {
@@ -138,9 +140,7 @@ const filteredData = computed(() => {
     }
     return true
   })
-})
-
-const handleSearch = () => {}
+}
 
 const handleReset = () => {
   searchForm.userNumber = ''
@@ -152,7 +152,7 @@ const handleReset = () => {
 }
 
 const handleSync = () => {
-  ElMessage.info('同步功能开发中')
+  ElMessage.success('同步调用成功')
 }
 </script>
 
@@ -182,14 +182,45 @@ const handleSync = () => {
   padding: 0 24px 20px;
 }
 
+.search-section :deep(.custom-form) {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 16px;
+}
+
 .search-section :deep(.el-form-item) {
   margin-bottom: 0;
-  margin-right: 16px;
+  margin-right: 0;
 }
 
 .search-section :deep(.el-form-item__label) {
   font-weight: 500;
   color: #333;
+  white-space: nowrap;
+}
+
+.flex-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.time-item {
+  flex: 2;
+}
+
+.flex-item :deep(.el-input),
+.flex-item :deep(.el-select) {
+  width: 100% !important;
+}
+
+.time-item .time-range {
+  width: 100%;
+}
+
+.time-item :deep(.el-date-editor) {
+  flex: 1;
+  min-width: 0;
 }
 
 .time-range {
@@ -204,6 +235,7 @@ const handleSync = () => {
 }
 
 .btn-group {
+  flex-shrink: 0;
   margin-left: auto;
   margin-right: 0;
 }

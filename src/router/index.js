@@ -9,7 +9,10 @@ import ApplicationManagement from '@/views/ApplicationManagement.vue'
 import SceneConfiguration from '@/views/SceneConfiguration.vue'
 import BusinessConfiguration from '@/views/BusinessConfiguration.vue'
 import UserList from '@/views/UserList.vue'
-import CDRList from '@/views/CDRList.vue'
+import BillingPackage from '@/views/BillingPackage.vue'
+import ChargesDetail from '@/views/ChargesDetail.vue'
+import CDRDetail from '@/views/CDRDetail.vue'
+import CallRecords from '@/views/CallRecords.vue'
 import LogList from '@/views/LogList.vue'
 import DataMonitor from '@/views/DataMonitor.vue'
 
@@ -55,9 +58,24 @@ const routes = [
         component: SceneConfiguration
       },
       {
-        path: 'cdr/list',
-        name: 'CDRList',
-        component: CDRList
+        path: 'cdr/billing',
+        name: 'BillingPackage',
+        component: BillingPackage
+      },
+      {
+        path: 'cdr/charges',
+        name: 'ChargesDetail',
+        component: ChargesDetail
+      },
+      {
+        path: 'cdr/detail',
+        name: 'CDRDetail',
+        component: CDRDetail
+      },
+      {
+        path: 'cdr/calls',
+        name: 'CallRecords',
+        component: CallRecords
       },
       {
         path: 'log/list',
