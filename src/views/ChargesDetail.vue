@@ -2,7 +2,7 @@
   <div class="charges-detail p-6 bg-white min-h-full">
     <!-- 顶部标题和操作按钮 -->
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-medium text-gray-800">费用明细</h2>
+      <h2 class="text-lg font-medium text-[#333333]">费用明细</h2>
       <el-button type="primary" :icon="Refresh" class="action-btn" @click="handleSync">同步费用明细</el-button>
     </div>
 
@@ -15,9 +15,11 @@
         <el-form-item label="子业务场景">
           <el-select v-model="searchForm.subScene" placeholder="全部场景" clearable class="!w-60">
             <el-option label="全部场景" value="" />
-            <el-option label="001趣味通话" value="001趣味通话" />
-            <el-option label="002视频通话" value="002视频通话" />
-            <el-option label="003语音信箱" value="003语音信箱" />
+            <el-option label="001001虚拟背景" value="001001虚拟背景" />
+            <el-option label="001002美颜滤镜" value="001002美颜滤镜" />
+            <el-option label="002001高清视频" value="002001高清视频" />
+            <el-option label="002002屏幕共享" value="002002屏幕共享" />
+            <el-option label="003001语音留言" value="003001语音留言" />
           </el-select>
         </el-form-item>
         <el-form-item label="服务开始时间">
