@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { reactive, computed } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import { ElMessage } from 'element-plus'
@@ -99,8 +99,8 @@ const searchForm = reactive({
   endTimeTo: null
 })
 
-// Mock 数据
-const rawData = ref([
+// Mock 数据（静态只读，无需响应式）
+const rawData = [
   { transactionId: 'JF05689123', userNumber: '13869421569', callId: 'FW25518064', appId: 'AP25518064', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按时长', unitPrice: 1, totalCost: 8, duration: '07:56', count: null, startTime: '2024-03-25 10:00:00', endTime: '2024-03-25 10:08:00' },
   { transactionId: 'JF81236940', userNumber: '18512489653', callId: 'FW25691240', appId: 'AP25691240', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按次', unitPrice: 5, totalCost: 5, duration: null, count: 1, startTime: '2024-03-24 10:00:00', endTime: '2024-03-25 10:08:00' },
   { transactionId: 'JF05689124', userNumber: '13869421569', callId: 'FW25518065', appId: 'AP25518064', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按时长', unitPrice: 1, totalCost: 8, duration: '07:56', count: null, startTime: '2024-03-25 10:00:00', endTime: '2024-03-25 10:08:00' },
@@ -113,11 +113,11 @@ const rawData = ref([
   { transactionId: 'JF81236944', userNumber: '13900001111', callId: 'FW25691244', appId: 'AP25691241', businessScene: '003语音信箱', subScene: '003001语音留言', billingMethod: '按次', unitPrice: 2, totalCost: 6, duration: null, count: 3, startTime: '2024-03-24 10:00:00', endTime: '2024-03-25 10:08:00' },
   { transactionId: 'JF05689128', userNumber: '13869421569', callId: 'FW25518069', appId: 'AP25518064', businessScene: '001趣味通话', subScene: '001002美颜滤镜', billingMethod: '按时长', unitPrice: 1, totalCost: 5, duration: '05:00', count: null, startTime: '2024-03-25 10:00:00', endTime: '2024-03-25 10:05:00' },
   { transactionId: 'JF81236945', userNumber: '18512489653', callId: 'FW25691245', appId: 'AP25691240', businessScene: '001趣味通话', subScene: '001001虚拟背景', billingMethod: '按次', unitPrice: 5, totalCost: 15, duration: null, count: 3, startTime: '2024-03-24 10:00:00', endTime: '2024-03-25 10:08:00' }
-])
+]
 
 // 搜索过滤
 const filteredData = computed(() => {
-  return rawData.value.filter(item => {
+  return rawData.filter(item => {
     if (searchForm.userNumber && item.userNumber !== searchForm.userNumber) return false
     if (searchForm.subScene && item.subScene !== searchForm.subScene) return false
     if (searchForm.startTimeFrom) {
