@@ -1,13 +1,13 @@
 <template>
-  <div class="charges-detail p-6 bg-white min-h-full">
+  <div class="charges-detail h-full flex flex-col bg-white">
     <!-- 顶部标题和操作按钮 -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center px-6 pt-6 pb-4">
       <h2 class="text-lg font-medium text-[#333333]">费用明细</h2>
       <el-button type="primary" :icon="Refresh" class="action-btn" @click="handleSync">同步费用明细</el-button>
     </div>
 
     <!-- 搜索表单 -->
-    <div class="search-section mb-6">
+    <div class="search-section px-6 pb-6">
       <el-form :inline="true" :model="searchForm" class="custom-form flex items-center flex-wrap gap-y-4">
         <el-form-item label="用户号码">
           <el-input v-model="searchForm.userNumber" placeholder="请输入" clearable class="!w-60" />
@@ -44,39 +44,42 @@
     </div>
 
     <!-- 数据表格 -->
-    <div class="table-section">
-      <el-table
-        :data="filteredData"
-        style="width: 100%"
-        :header-cell-style="{ background: '#f8fafc', color: '#606266', fontWeight: 'bold' }"
-        class="custom-table"
-      >
-        <el-table-column prop="transactionId" label="流水号" min-width="130" />
-        <el-table-column prop="userNumber" label="用户号码" min-width="140" />
-        <el-table-column prop="callId" label="通话标识" min-width="130" />
-        <el-table-column prop="appId" label="应用ID" min-width="130" />
-        <el-table-column prop="businessScene" label="业务场景" min-width="120" />
-        <el-table-column prop="subScene" label="子业务场景" min-width="140" />
-        <el-table-column prop="billingMethod" label="计费方式" min-width="100" />
-        <el-table-column label="业务单价" min-width="110">
-          <template #default="scope">
-            {{ scope.row.unitPrice }} {{ scope.row.billingMethod === '按时长' ? '元/分钟' : '元/次' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="totalCost" label="业务总费用(元)" min-width="140" sortable />
-        <el-table-column label="服务时长" min-width="100">
-          <template #default="scope">
-            {{ scope.row.billingMethod === '按时长' ? scope.row.duration : '--' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="服务次数" min-width="100">
-          <template #default="scope">
-            {{ scope.row.billingMethod === '按次' ? scope.row.count : '--' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="startTime" label="服务开始时间" min-width="180" />
-        <el-table-column prop="endTime" label="服务结束时间" min-width="180" />
-      </el-table>
+    <div class="table-section flex-1 min-h-0 flex flex-col px-6 pb-6">
+      <div class="flex-1 min-h-0">
+        <el-table
+          :data="filteredData"
+          height="100%"
+          style="width: 100%"
+          :header-cell-style="{ background: '#f8fafc', color: '#606266', fontWeight: 'bold' }"
+          class="custom-table"
+        >
+          <el-table-column prop="transactionId" label="流水号" min-width="130" />
+          <el-table-column prop="userNumber" label="用户号码" min-width="140" />
+          <el-table-column prop="callId" label="通话标识" min-width="130" />
+          <el-table-column prop="appId" label="应用ID" min-width="130" />
+          <el-table-column prop="businessScene" label="业务场景" min-width="120" />
+          <el-table-column prop="subScene" label="子业务场景" min-width="140" />
+          <el-table-column prop="billingMethod" label="计费方式" min-width="100" />
+          <el-table-column label="业务单价" min-width="110">
+            <template #default="scope">
+              {{ scope.row.unitPrice }} {{ scope.row.billingMethod === '按时长' ? '元/分钟' : '元/次' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="totalCost" label="业务总费用(元)" min-width="140" sortable />
+          <el-table-column label="服务时长" min-width="100">
+            <template #default="scope">
+              {{ scope.row.billingMethod === '按时长' ? scope.row.duration : '--' }}
+            </template>
+          </el-table-column>
+          <el-table-column label="服务次数" min-width="100">
+            <template #default="scope">
+              {{ scope.row.billingMethod === '按次' ? scope.row.count : '--' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="startTime" label="服务开始时间" min-width="180" />
+          <el-table-column prop="endTime" label="服务结束时间" min-width="180" />
+        </el-table>
+      </div>
 
       <UnifiedPagination :total="360" />
     </div>

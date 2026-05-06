@@ -92,7 +92,10 @@ const pageTitleMap = {
   'BusinessConfiguration': '业务配置',
   'UserSubscription': '用户订购关系',
   'SceneConfiguration': '业务场景定制',
-  'CDRList': 'CDR管理',
+  'BillingPackage': '计费套餐',
+  'ChargesDetail': '费用明细',
+  'CDRDetail': 'CDR明细',
+  'CallRecords': '通话记录',
   'LogList': '日志管控',
   'DataMonitor': '数据监控',
   'RealtimeCall': '呼叫监控',
@@ -359,7 +362,7 @@ const handleContextCommand = (command) => {
 
 .content-area {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   padding: 20px;
   min-height: 0;
 }
