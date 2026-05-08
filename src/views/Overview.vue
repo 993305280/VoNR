@@ -36,13 +36,13 @@
       </el-form>
 
       <div class="action-buttons">
-        <el-button color="#1d4ed8" @click="handleSync">同步素材</el-button>
+        <el-button type="primary" icon="Refresh" @click="handleSync">同步素材</el-button>
         <el-button type="primary" icon="Plus" @click="openModal('add')">新增素材</el-button>
-        <el-button type="danger" plain @click="handleBatchDelete">批量删除</el-button>
+        <el-button type="danger" icon="Delete" plain @click="handleBatchDelete">删除素材</el-button>
       </div>
     </div>
 
-    <div class="table-container">
+    <div v-if="currentTab === '图片'" class="table-container">
       <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="编号" width="80" />
@@ -84,6 +84,9 @@
 
       <UnifiedPagination :total="360" />
     </div>
+
+    <!-- 音频 Tab -->
+    <AudioTab v-if="currentTab === '音频'" />
 
     <el-dialog
       v-model="dialogVisible"
@@ -148,9 +151,10 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Refresh, Delete } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
+import AudioTab from '@/components/audio/AudioTab.vue'
 
 const currentTab = ref('图片')
 const dialogVisible = ref(false)
