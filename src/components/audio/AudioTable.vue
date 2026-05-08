@@ -1,12 +1,26 @@
 <template>
   <div class="audio-table-container">
     <el-table
+      ref="tableRef"
       :data="data"
       :loading="loading"
       style="width: 100%"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="50" />
+      <el-table-column type="expand">
+        <template #default="{ row }">
+          <div v-if="playingId === row.id" class="inline-player">
+            <AudioWavePlayer
+              ref="playerRef"
+              :src="currentPlayingUrl"
+              :height="60"
+              :show-controls="true"
+              @ended="handlePlayEnded"
+            />
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column prop="id" label="编号" width="70" />
       <el-table-column label="素材名称" min-width="200">
         <template #default="{ row }">
@@ -69,14 +83,6 @@
         </template>
       </el-table-column>
     </el-table>
-
-    <div v-if="playingId" class="inline-player">
-      <AudioWavePlayer
-        ref="playerRef"
-        :src="currentPlayingUrl"
-        @ended="handlePlayEnded"
-      />
-    </div>
   </div>
 </template>
 
@@ -85,13 +91,14 @@ import { ref } from 'vue'
 import { VideoPlay, VideoPause } from '@element-plus/icons-vue'
 import AudioWavePlayer from './AudioWavePlayer.vue'
 
-defineProps({
+const props = defineProps({
   data: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['selection-change', 'edit', 'delete', 'detail', 'play'])
 
+const tableRef = ref(null)
 const playingId = ref(null)
 const currentPlayingUrl = ref('')
 const playerRef = ref(null)
@@ -111,8 +118,19 @@ const handlePlay = (row) => {
   if (playingId.value === row.id) {
     playerRef.value?.togglePlay()
   } else {
+    // Collapse previous row if any
+    if (playingId.value && tableRef.value) {
+      const prevRow = props.data.find(r => r.id === playingId.value)
+      if (prevRow) tableRef.value.toggleRowExpansion(prevRow, false)
+    }
+
+    // Set new playing row
     playingId.value = row.id
     currentPlayingUrl.value = row.url
+
+    // Expand the row
+    tableRef.value?.toggleRowExpansion(row, true)
+
     emit('play', row)
   }
 }
@@ -153,10 +171,8 @@ const handlePlayEnded = () => {
 }
 
 .inline-player {
-  padding: 16px 20px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  margin-top: 12px;
+  padding: 12px 20px;
+  background: #f5f7fa;
 }
 
 .text-red {
