@@ -14,19 +14,15 @@
 
       <!-- 文本内容 -->
       <el-form-item label="文本内容" required>
-        <div class="content-input-wrapper">
-          <el-input
-            v-model="formData.content"
-            type="textarea"
-            :rows="6"
-            placeholder="请输入文本内容"
-            :maxlength="maxLength"
-            show-word-limit
-          />
-          <div class="content-stats">
-            <span>字数：{{ currentLength }}/{{ maxLength }}</span>
-          </div>
-        </div>
+        <el-input
+          v-model="formData.content"
+          type="textarea"
+          :rows="6"
+          placeholder="请输入文本内容"
+          :maxlength="maxLength"
+          :class="{ 'is-over-limit': isOverLimit }"
+          show-word-limit
+        />
       </el-form-item>
 
       <!-- 素材说明 -->
@@ -45,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -61,6 +57,10 @@ const formData = reactive({ name: '', content: '', description: '' })
 
 const currentLength = computed(() => {
   return formData.content ? formData.content.length : 0
+})
+
+const isOverLimit = computed(() => {
+  return currentLength.value > props.maxLength
 })
 
 // 监听 visible 变化，填充/重置表单
@@ -103,17 +103,6 @@ const handleSave = () => {
 </script>
 
 <style scoped lang="scss">
-.content-input-wrapper {
-  width: 100%;
-}
-
-.content-stats {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #909399;
-  text-align: right;
-}
-
 .dialog-footer {
   display: flex;
   justify-content: center;
@@ -122,5 +111,9 @@ const handleSave = () => {
 
 :deep(.el-button--primary) {
   --el-button-bg-color: #1d4ed8;
+}
+
+:deep(.is-over-limit .el-textarea__inner) {
+  border-color: #f56c6c !important;
 }
 </style>
