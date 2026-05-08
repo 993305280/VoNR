@@ -5,14 +5,31 @@
       background
       layout="prev, pager, next, jumper, sizes"
       :total="total"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :page-sizes="[10, 20, 50, 100]"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
     />
   </div>
 </template>
 
 <script setup>
-defineProps({
-  total: { type: Number, default: 360 }
+const props = defineProps({
+  total: { type: Number, default: 360 },
+  currentPage: { type: Number, default: 1 },
+  pageSize: { type: Number, default: 10 }
 })
+
+const emit = defineEmits(['page-change', 'size-change'])
+
+const handleCurrentChange = (page) => {
+  emit('page-change', page)
+}
+
+const handleSizeChange = (size) => {
+  emit('size-change', size)
+}
 </script>
 
 <style lang="scss" scoped>

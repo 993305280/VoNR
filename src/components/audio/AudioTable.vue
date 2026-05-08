@@ -53,8 +53,8 @@
       </el-table-column>
       <el-table-column label="可用状态" width="80">
         <template #default="{ row }">
-          <span :class="row.available === '可用' ? 'text-green' : 'text-red'">
-            {{ row.available }}
+          <span :class="row.availableStatus === '可用' ? 'text-green' : 'text-red'">
+            {{ row.availableStatus }}
           </span>
         </template>
       </el-table-column>

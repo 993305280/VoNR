@@ -18,15 +18,15 @@
         </el-form-item>
         <el-form-item label="审核状态">
           <el-select v-model="searchForm.auditStatus" placeholder="全部状态" style="width: 150px">
-            <el-option label="审核中" value="1" />
-            <el-option label="审核成功" value="2" />
-            <el-option label="审核失败" value="3" />
+            <el-option label="审核中" value="审核中" />
+            <el-option label="审核成功" value="审核成功" />
+            <el-option label="审核失败" value="审核失败" />
           </el-select>
         </el-form-item>
         <el-form-item label="可用状态">
           <el-select v-model="searchForm.useStatus" placeholder="全部状态" style="width: 150px">
-            <el-option label="可用" value="1" />
-            <el-option label="不可用" value="2" />
+            <el-option label="可用" value="可用" />
+            <el-option label="不可用" value="不可用" />
           </el-select>
         </el-form-item>
         <el-form-item>
