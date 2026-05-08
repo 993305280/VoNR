@@ -44,7 +44,9 @@ const {
   selectedRows,
   handlePageChange,
   handleSizeChange,
-  handleSelectionChange
+  handleSelectionChange,
+  handleDelete,
+  handleBatchDelete: handleBatchDeleteFromComposable
 } = useTextData()
 
 const formModalVisible = ref(false)
@@ -72,8 +74,8 @@ const handleDeleteClick = (row) => {
       type: 'warning'
     }
   ).then(() => {
+    handleDelete(row)
     ElMessage.success('删除成功')
-    console.log('删除:', row)
   }).catch(() => {})
 }
 
@@ -92,8 +94,9 @@ const handleBatchDelete = () => {
       type: 'warning'
     }
   ).then(() => {
-    ElMessage.success(`成功删除 ${selectedRows.value.length} 个文本素材`)
-    selectedRows.value = []
+    const count = selectedRows.value.length
+    handleBatchDeleteFromComposable()
+    ElMessage.success(`成功删除 ${count} 个文本素材`)
   }).catch(() => {})
 }
 

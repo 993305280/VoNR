@@ -121,8 +121,21 @@ export function useTextData() {
     selectedRows.value = rows
   }
 
+  const handleDelete = (row) => {
+    const index = tableData.value.findIndex(item => item.id === row.id)
+    if (index !== -1) {
+      tableData.value.splice(index, 1)
+      total.value = Math.max(0, total.value - 1)
+    }
+  }
+
   const handleBatchDelete = () => {
-    console.log('批量删除:', selectedRows.value)
+    if (selectedRows.value.length === 0) return
+
+    const ids = selectedRows.value.map(row => row.id)
+    tableData.value = tableData.value.filter(item => !ids.includes(item.id))
+    total.value = Math.max(0, total.value - selectedRows.value.length)
+    selectedRows.value = []
   }
 
   const handleSync = () => {
@@ -144,6 +157,7 @@ export function useTextData() {
     handlePageChange,
     handleSizeChange,
     handleSelectionChange,
+    handleDelete,
     handleBatchDelete,
     handleSync
   }
