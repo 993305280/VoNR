@@ -91,6 +91,9 @@
     <!-- 视频 Tab -->
     <VideoTab v-if="currentTab === '视频'" ref="videoTabRef" />
 
+    <!-- 文本 Tab -->
+    <TextTab v-if="currentTab === '文本'" ref="textTabRef" />
+
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
@@ -178,12 +181,14 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import AudioTab from '@/components/audio/AudioTab.vue'
 import VideoTab from '@/components/video/VideoTab.vue'
+import TextTab from '@/components/text/TextTab.vue'
 
 const currentTab = ref('图片')
 const dialogVisible = ref(false)
 const dialogMode = ref('add') // add, edit, preview, delete
 const audioTabRef = ref(null)
 const videoTabRef = ref(null)
+const textTabRef = ref(null)
 const currentBlobUrl = ref(null)
 
 const searchForm = reactive({
@@ -275,9 +280,15 @@ const handleBatchDelete = () => {
     audioTabRef.value?.handleBatchDelete()
   } else if (currentTab.value === '视频') {
     videoTabRef.value?.handleBatchDelete()
+  } else if (currentTab.value === '文本') {
+    textTabRef.value?.handleBatchDelete()
   } else {
     ElMessage.info('该功能开发中')
   }
+}
+
+const handleSync = () => {
+  ElMessage.info('同步素材功能开发中')
 }
 
 const handleConfirm = () => {
