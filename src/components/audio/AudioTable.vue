@@ -5,22 +5,10 @@
       :data="data"
       :loading="loading"
       style="width: 100%"
+      height="100%"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="50" />
-      <el-table-column type="expand">
-        <template #default="{ row }">
-          <div v-if="playingId === row.id" class="inline-player">
-            <AudioWavePlayer
-              ref="playerRef"
-              :src="currentPlayingUrl"
-              :height="60"
-              :show-controls="true"
-              @ended="handlePlayEnded"
-            />
-          </div>
-        </template>
-      </el-table-column>
+      <el-table-column type="selection" width="50" :selectable="canSelect" />
       <el-table-column prop="id" label="编号" width="70" />
       <el-table-column label="素材名称" min-width="200">
         <template #default="{ row }">
@@ -29,12 +17,11 @@
               class="play-btn"
               size="small"
               circle
-              @click="handlePlay(row)"
+              @click="$emit('play', row)"
             >
-              <el-icon v-if="playingId === row.id"><VideoPause /></el-icon>
-              <el-icon v-else><VideoPlay /></el-icon>
+              <el-icon><VideoPlay /></el-icon>
             </el-button>
-            <span class="material-name" @click="$emit('detail', row)">
+            <span class="material-name" @click="$emit('play', row)">
               {{ row.name }}
             </span>
           </div>
@@ -76,6 +63,7 @@
             type="danger"
             link
             size="small"
+            :disabled="row.syncStatus === '同步中' || row.syncStatus === '审核中'"
             @click="$emit('delete', row)"
           >
             删除
@@ -88,20 +76,16 @@
 
 <script setup>
 import { ref } from 'vue'
-import { VideoPlay, VideoPause } from '@element-plus/icons-vue'
-import AudioWavePlayer from './AudioWavePlayer.vue'
+import { VideoPlay } from '@element-plus/icons-vue'
 
-const props = defineProps({
+defineProps({
   data: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['selection-change', 'edit', 'delete', 'detail', 'play'])
+const emit = defineEmits(['selection-change', 'edit', 'delete', 'play'])
 
 const tableRef = ref(null)
-const playingId = ref(null)
-const currentPlayingUrl = ref('')
-const playerRef = ref(null)
 
 const getStatusClass = (status) => {
   if (status.includes('失败')) return 'text-red'
@@ -114,46 +98,24 @@ const handleSelectionChange = (selection) => {
   emit('selection-change', selection)
 }
 
-const handlePlay = (row) => {
-  if (playingId.value === row.id) {
-    playerRef.value?.togglePlay()
-  } else {
-    // Collapse previous row if any
-    if (playingId.value && tableRef.value) {
-      const prevRow = props.data.find(r => r.id === playingId.value)
-      if (prevRow) tableRef.value.toggleRowExpansion(prevRow, false)
-    }
-
-    // Set new playing row
-    playerRef.value = null  // Clear old reference
-    playingId.value = row.id
-    currentPlayingUrl.value = row.url
-
-    // Expand the row
-    tableRef.value?.toggleRowExpansion(row, true)
-
-    emit('play', row)
-  }
-}
-
-const handlePlayEnded = () => {
-  // Collapse the expanded row
-  if (playingId.value && tableRef.value) {
-    const row = props.data.find(r => r.id === playingId.value)
-    if (row) tableRef.value.toggleRowExpansion(row, false)
-  }
-  playingId.value = null
-  currentPlayingUrl.value = ''
+const canSelect = (row) => {
+  return row.syncStatus !== '同步中' && row.syncStatus !== '审核中'
 }
 </script>
 
 <style scoped lang="scss">
 .audio-table-container {
   width: 100%;
+  flex: 1;
+  overflow: hidden;
 
   :deep(.el-table th) {
     background-color: #f8f9fb;
     color: #333;
+  }
+
+  :deep(.el-table__body-wrapper) {
+    overflow-y: auto;
   }
 }
 
@@ -174,11 +136,6 @@ const handlePlayEnded = () => {
       text-decoration: underline;
     }
   }
-}
-
-.inline-player {
-  padding: 12px 20px;
-  background: #f5f7fa;
 }
 
 .text-red {

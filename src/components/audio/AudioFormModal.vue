@@ -15,18 +15,50 @@
       <!-- 上传素材 -->
       <el-form-item label="上传素材" required>
         <div class="upload-section">
-          <el-upload
-            :auto-upload="false"
-            :show-file-list="false"
-            accept=".mp3,.wav,.aac,.m4a"
-            :on-change="handleFileChange"
-          >
-            <el-button type="primary" :icon="Upload">点击上传</el-button>
-          </el-upload>
-          <span class="upload-hint">
-            请上传时长小于30分钟的音频，支持主流的音频格式
-          </span>
+          <!-- 上传按钮 -->
+          <div class="upload-row">
+            <el-upload
+              ref="uploadRef"
+              :auto-upload="false"
+              :show-file-list="false"
+              accept=".mp3,.wav,.aac,.m4a"
+              :on-change="handleFileChange"
+              :before-upload="beforeUpload"
+            >
+              <el-button type="primary" :icon="Upload">点击上传</el-button>
+            </el-upload>
+            <span class="upload-hint">
+              请上传时长小于30分钟的音频，支持主流的音频格式
+            </span>
+          </div>
 
+          <!-- 上传进度 -->
+          <el-progress
+            v-if="uploadProgress > 0 && uploadProgress < 100"
+            :percentage="uploadProgress"
+            :stroke-width="8"
+            class="upload-progress"
+          />
+
+          <!-- 已上传文件信息 -->
+          <div v-if="fileInfo && formData.url" class="file-info">
+            <div class="file-info-left">
+              <el-icon class="file-icon"><Document /></el-icon>
+              <span class="file-name">{{ fileInfo.name }}</span>
+              <span class="file-size">{{ fileInfo.size }}</span>
+            </div>
+            <el-button
+              type="danger"
+              link
+              size="small"
+              :icon="Delete"
+              @click="handleRemoveFile"
+            >
+              删除
+            </el-button>
+          </div>
+
+          <!-- 音频预览 -->
           <div class="audio-preview">
             <AudioWavePlayer
               v-if="formData.url"
@@ -58,7 +90,7 @@
 
 <script setup>
 import { ref, reactive, watch, onBeforeUnmount } from 'vue'
-import { Upload } from '@element-plus/icons-vue'
+import { Upload, Delete, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import AudioWavePlayer from './AudioWavePlayer.vue'
 
@@ -72,15 +104,37 @@ const emit = defineEmits(['update:visible', 'save'])
 
 const formData = reactive({ name: '', url: '', description: '' })
 const currentBlobUrl = ref(null)
+const uploadRef = ref(null)
+const uploadProgress = ref(0)
+const fileInfo = ref(null)
 
 // 监听 visible 变化，填充/重置表单
 watch(() => props.visible, (val) => {
   if (val) {
-    Object.assign(formData, {
-      name: props.data?.name || '',
-      url: props.data?.url || '',
-      description: props.data?.description || ''
-    })
+    // 重置状态
+    uploadProgress.value = 0
+    fileInfo.value = null
+
+    if (props.mode === 'edit' && props.data?.url) {
+      // 编辑模式：回显已上传文件
+      Object.assign(formData, {
+        name: props.data?.name || '',
+        url: props.data?.url || '',
+        description: props.data?.description || ''
+      })
+      fileInfo.value = {
+        name: props.data?.name || '音频文件',
+        size: props.data?.size || '未知',
+        format: props.data?.format || 'mp3'
+      }
+    } else {
+      // 新增模式：重置表单
+      Object.assign(formData, {
+        name: '',
+        url: '',
+        description: ''
+      })
+    }
   }
 })
 
@@ -91,14 +145,62 @@ onBeforeUnmount(() => {
   }
 })
 
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+}
+
+// 上传前校验
+const beforeUpload = (file) => {
+  const isAudio = ['audio/mpeg', 'audio/wav', 'audio/aac', 'audio/x-m4a'].includes(file.type)
+  if (!isAudio) {
+    ElMessage.error('只能上传音频文件')
+    return false
+  }
+  const isLt30M = file.size / 1024 / 1024 < 30
+  if (!isLt30M) {
+    ElMessage.error('音频文件大小不能超过 30MB')
+    return false
+  }
+  return true
+}
+
 const handleFileChange = (file) => {
+  if (!beforeUpload(file.raw)) return
+
   // 撤销旧的 blob URL
   if (currentBlobUrl.value) {
     URL.revokeObjectURL(currentBlobUrl.value)
   }
-  // 创建新的 blob URL
-  currentBlobUrl.value = URL.createObjectURL(file.raw)
-  formData.url = currentBlobUrl.value
+
+  // 模拟上传进度
+  uploadProgress.value = 0
+  const timer = setInterval(() => {
+    uploadProgress.value += 10
+    if (uploadProgress.value >= 100) {
+      clearInterval(timer)
+      // 创建新的 blob URL
+      currentBlobUrl.value = URL.createObjectURL(file.raw)
+      formData.url = currentBlobUrl.value
+      fileInfo.value = {
+        name: file.name,
+        size: formatFileSize(file.size),
+        format: file.name.split('.').pop()
+      }
+    }
+  }, 50)
+}
+
+const handleRemoveFile = () => {
+  if (currentBlobUrl.value) {
+    URL.revokeObjectURL(currentBlobUrl.value)
+    currentBlobUrl.value = null
+  }
+  formData.url = ''
+  fileInfo.value = null
+  uploadProgress.value = 0
 }
 
 const handleSave = () => {
@@ -120,10 +222,55 @@ const handleSave = () => {
   width: 100%;
 }
 
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .upload-hint {
   font-size: 12px;
   color: #a8abb2;
-  margin-left: 12px;
+}
+
+.upload-progress {
+  margin-top: 12px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #f5f7fa;
+  border-radius: 4px;
+  border: 1px solid #e4e7ed;
+}
+
+.file-info-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-icon {
+  color: #909399;
+  font-size: 18px;
+}
+
+.file-name {
+  color: #333;
+  font-size: 14px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  color: #909399;
+  font-size: 12px;
 }
 
 .audio-preview {
