@@ -86,7 +86,10 @@
     </div>
 
     <!-- 音频 Tab -->
-    <AudioTab v-if="currentTab === '音频'" />
+    <AudioTab v-if="currentTab === '音频'" ref="audioTabRef" />
+
+    <!-- 视频 Tab -->
+    <VideoTab v-if="currentTab === '视频'" ref="videoTabRef" />
 
     <el-dialog
       v-model="dialogVisible"
@@ -100,12 +103,31 @@
         </el-form-item>
         <el-form-item label="上传素材" required>
           <div class="upload-area">
-            <div v-if="!formData.url" class="upload-placeholder">
-              <el-icon><Plus /></el-icon>
-              <p>点击上传</p>
+            <el-upload
+              v-if="!formData.url"
+              class="upload-uploader"
+              :auto-upload="false"
+              :show-file-list="false"
+              accept=".png,.jpg,.jpeg"
+              :on-change="handleImageChange"
+            >
+              <div class="upload-placeholder">
+                <el-icon><Plus /></el-icon>
+                <p>点击上传</p>
+              </div>
+            </el-upload>
+            <div v-else class="preview-wrapper">
+              <img :src="formData.url" class="preview-img-form" />
+              <el-button
+                class="delete-btn"
+                type="danger"
+                :icon="Delete"
+                circle
+                size="small"
+                @click="handleRemoveImage"
+              />
             </div>
-            <img v-else :src="formData.url" class="preview-img-form" />
-            <span class="upload-hint">请上传文件大小不超过10M的图片，仅支持png格式</span>
+            <span class="upload-hint">请上传文件大小不超过10M的图片，仅支持png/jpg格式</span>
           </div>
         </el-form-item>
         <el-form-item label="素材说明">
@@ -152,13 +174,17 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { Plus, Refresh, Delete } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 import AudioTab from '@/components/audio/AudioTab.vue'
+import VideoTab from '@/components/video/VideoTab.vue'
 
 const currentTab = ref('图片')
 const dialogVisible = ref(false)
 const dialogMode = ref('add') // add, edit, preview, delete
+const audioTabRef = ref(null)
+const videoTabRef = ref(null)
+const currentBlobUrl = ref(null)
 
 const searchForm = reactive({
   name: '',
@@ -215,6 +241,45 @@ const handleDelete = (row) => {
   openModal('delete')
 }
 
+const handleImageChange = (file) => {
+  const isImage = ['image/png', 'image/jpeg'].includes(file.raw.type)
+  if (!isImage) {
+    ElMessage.error('只能上传 png/jpg 格式的图片')
+    return
+  }
+  const isLt10M = file.raw.size / 1024 / 1024 < 10
+  if (!isLt10M) {
+    ElMessage.error('图片大小不能超过 10MB')
+    return
+  }
+
+  // 撤销旧的 blob URL
+  if (currentBlobUrl.value) {
+    URL.revokeObjectURL(currentBlobUrl.value)
+  }
+  // 创建新的 blob URL
+  currentBlobUrl.value = URL.createObjectURL(file.raw)
+  formData.url = currentBlobUrl.value
+}
+
+const handleRemoveImage = () => {
+  if (currentBlobUrl.value) {
+    URL.revokeObjectURL(currentBlobUrl.value)
+    currentBlobUrl.value = null
+  }
+  formData.url = ''
+}
+
+const handleBatchDelete = () => {
+  if (currentTab.value === '音频') {
+    audioTabRef.value?.handleBatchDelete()
+  } else if (currentTab.value === '视频') {
+    videoTabRef.value?.handleBatchDelete()
+  } else {
+    ElMessage.info('该功能开发中')
+  }
+}
+
 const handleConfirm = () => {
   // 处理各种逻辑
   console.log('Action Confirmed:', dialogMode.value)
@@ -228,6 +293,8 @@ const handleConfirm = () => {
   /* padding: 20px; */
   background-color: #fff;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
@@ -236,6 +303,7 @@ const handleConfirm = () => {
   display: flex;
   border-bottom: 1px solid #e4e7ed;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 .tab-item {
   padding: 10px 25px;
@@ -259,6 +327,7 @@ const handleConfirm = () => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-shrink: 0;
 }
 
 /* 表格样式 */
@@ -293,21 +362,57 @@ const handleConfirm = () => {
 
 /* 弹窗内部样式 */
 .upload-area {
-  border: 1px dashed #dcdfe6;
-  border-radius: 6px;
-  padding: 15px;
-  text-align: center;
-  background: #fafafa;
+  width: 100%;
 }
+
+.upload-uploader {
+  :deep(.el-upload) {
+    border: 1px dashed #dcdfe6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+
+    &:hover {
+      border-color: #1d4ed8;
+    }
+  }
+}
+
 .upload-placeholder {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: #909399;
   font-size: 12px;
+
+  .el-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
 }
+
+.preview-wrapper {
+  position: relative;
+  display: inline-block;
+
+  .delete-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+  }
+}
+
 .preview-img-form {
   width: 120px;
   height: 120px;
   object-fit: cover;
+  border-radius: 4px;
+  display: block;
 }
+
 .upload-hint {
   font-size: 12px;
   color: #a8abb2;
