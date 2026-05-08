@@ -20,10 +20,20 @@
           </div>
         </div>
       </el-popover>
+      <el-button :icon="VideoPlay" circle size="small" style="transform: rotate(180deg)" @click="$emit('prev')" />
       <el-button circle size="small" @click="togglePlay">
         <el-icon v-if="!isPlaying"><VideoPlay /></el-icon>
         <el-icon v-else><VideoPause /></el-icon>
       </el-button>
+      <el-button :icon="VideoPlay" circle size="small" @click="$emit('next')" />
+      <el-popover placement="top" :width="200" trigger="click">
+        <template #reference>
+          <el-button :icon="Microphone" circle size="small" />
+        </template>
+        <div class="volume-control">
+          <el-slider v-model="volumeValue" :min="0" :max="100" @change="handleVolumeChange" />
+        </div>
+      </el-popover>
       <span class="time-display">{{ currentTime }} / {{ duration }}</span>
     </div>
   </div>
@@ -32,16 +42,17 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import WaveSurfer from 'wavesurfer.js'
-import { VideoPlay, VideoPause } from '@element-plus/icons-vue'
+import { VideoPlay, VideoPause, Microphone } from '@element-plus/icons-vue'
 
 const props = defineProps({
   src: { type: String, default: '' },
   height: { type: Number, default: 80 },
   showControls: { type: Boolean, default: true },
-  showSpeed: { type: Boolean, default: true }
+  showSpeed: { type: Boolean, default: true },
+  volume: { type: Number, default: 1 }
 })
 
-const emit = defineEmits(['play', 'pause', 'ended'])
+const emit = defineEmits(['play', 'pause', 'ended', 'prev', 'next'])
 
 const waveformRef = ref(null)
 const isPlaying = ref(false)
@@ -49,6 +60,7 @@ const currentTime = ref('00:00')
 const duration = ref('00:00')
 const currentSpeed = ref(1)
 const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2]
+const volumeValue = ref(props.volume * 100)
 
 let wavesurfer = null
 
@@ -73,6 +85,12 @@ function togglePlay() {
 function setPlaybackRate(rate) {
   currentSpeed.value = rate
   wavesurfer?.setPlaybackRate(rate)
+}
+
+const handleVolumeChange = (val) => {
+  if (wavesurfer) {
+    wavesurfer.setVolume(val / 100)
+  }
 }
 
 onMounted(() => {
@@ -177,5 +195,9 @@ defineExpose({ play, pause, togglePlay, setPlaybackRate })
 .time-display {
   font-size: 13px;
   color: #606266;
+}
+
+.volume-control {
+  padding: 10px;
 }
 </style>
