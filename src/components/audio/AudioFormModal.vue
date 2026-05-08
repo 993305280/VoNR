@@ -16,7 +16,6 @@
       <el-form-item label="上传素材" required>
         <div class="upload-section">
           <el-upload
-            ref="uploadRef"
             :auto-upload="false"
             :show-file-list="false"
             accept=".mp3,.wav,.aac,.m4a"
@@ -31,7 +30,6 @@
           <div class="audio-preview">
             <AudioWavePlayer
               v-if="formData.url"
-              ref="playerRef"
               :src="formData.url"
               :height="80"
               :show-controls="true"
@@ -59,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onBeforeUnmount } from 'vue'
 import { Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import AudioWavePlayer from './AudioWavePlayer.vue'
@@ -73,24 +71,34 @@ const props = defineProps({
 const emit = defineEmits(['update:visible', 'save'])
 
 const formData = reactive({ name: '', url: '', description: '' })
-const uploadRef = ref(null)
-const playerRef = ref(null)
+const currentBlobUrl = ref(null)
 
 // 监听 visible 变化，填充/重置表单
 watch(() => props.visible, (val) => {
-  if (val && props.data) {
-    formData.name = props.data.name || ''
-    formData.url = props.data.url || ''
-    formData.description = props.data.description || ''
-  } else if (val) {
-    formData.name = ''
-    formData.url = ''
-    formData.description = ''
+  if (val) {
+    Object.assign(formData, {
+      name: props.data?.name || '',
+      url: props.data?.url || '',
+      description: props.data?.description || ''
+    })
+  }
+})
+
+// 清理 blob URL
+onBeforeUnmount(() => {
+  if (currentBlobUrl.value) {
+    URL.revokeObjectURL(currentBlobUrl.value)
   }
 })
 
 const handleFileChange = (file) => {
-  formData.url = URL.createObjectURL(file.raw)
+  // 撤销旧的 blob URL
+  if (currentBlobUrl.value) {
+    URL.revokeObjectURL(currentBlobUrl.value)
+  }
+  // 创建新的 blob URL
+  currentBlobUrl.value = URL.createObjectURL(file.raw)
+  formData.url = currentBlobUrl.value
 }
 
 const handleSave = () => {
