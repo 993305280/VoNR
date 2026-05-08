@@ -37,7 +37,7 @@
 
       <div class="action-buttons">
         <el-button type="primary" icon="Refresh" @click="handleSync">同步素材</el-button>
-        <el-button type="primary" icon="Plus" @click="openModal('add')">新增素材</el-button>
+        <el-button type="primary" icon="Plus" @click="openModal('add')">新增{{ currentTab }}素材</el-button>
         <el-button type="danger" icon="Delete" plain @click="handleBatchDelete">删除素材</el-button>
       </div>
     </div>
@@ -130,8 +130,8 @@
       </div>
 
       <div v-else-if="dialogMode === 'delete'" class="delete-confirm">
-        <p class="delete-text">是否删除此图片素材？</p>
-        <p class="delete-warning">删除后，关联此图片素材的业务场景将无法使用此图片素材，请谨慎操作！</p>
+        <p class="delete-text">是否删除此{{ currentTab }}素材？</p>
+        <p class="delete-warning">删除后，关联此{{ currentTab }}素材的业务场景将无法使用此{{ currentTab }}素材，请谨慎操作！</p>
       </div>
 
       <template #footer>
