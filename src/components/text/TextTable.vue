@@ -32,7 +32,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="description" label="素材说明" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="updateTime" label="操作时间" width="160" />
+      <el-table-column prop="updateTime" label="操作时间" width="160" :formatter="formatTime" />
       <el-table-column label="操作" width="100" fixed="right">
         <template #default="{ row }">
           <el-button
@@ -85,6 +85,18 @@ const handleSelectionChange = (selection) => {
 const canSelect = (row) => {
   return row.syncStatus !== '同步中' && row.syncStatus !== '审核中'
 }
+
+const formatTime = (_row, _column, cellValue) => {
+  if (!cellValue) return '-'
+  const date = new Date(cellValue)
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  const h = String(date.getHours()).padStart(2, '0')
+  const min = String(date.getMinutes()).padStart(2, '0')
+  const s = String(date.getSeconds()).padStart(2, '0')
+  return `${y}-${m}-${d} ${h}:${min}:${s}`
+}
 </script>
 
 <style scoped lang="scss">
@@ -105,11 +117,6 @@ const canSelect = (row) => {
 
 .material-name {
   color: #1d4ed8;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 .text-red {
