@@ -125,6 +125,7 @@ const handlePlay = (row) => {
     }
 
     // Set new playing row
+    playerRef.value = null  // Clear old reference
     playingId.value = row.id
     currentPlayingUrl.value = row.url
 
@@ -136,6 +137,11 @@ const handlePlay = (row) => {
 }
 
 const handlePlayEnded = () => {
+  // Collapse the expanded row
+  if (playingId.value && tableRef.value) {
+    const row = props.data.find(r => r.id === playingId.value)
+    if (row) tableRef.value.toggleRowExpansion(row, false)
+  }
   playingId.value = null
   currentPlayingUrl.value = ''
 }
