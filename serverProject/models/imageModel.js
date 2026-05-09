@@ -1,8 +1,15 @@
 const pool = require('../config/db');
 
+// 合法的列名白名单，防止 SQL 注入
+const VALID_COLUMNS = ['name', 'file_path', 'file_name', 'thumbnail_path', 'resolution', 'format', 'file_size', 'audit_type', 'audit_status', 'sync_status', 'available', 'description', 'operator'];
+
 const ImageModel = {
   // 分页查询图片列表
   async findWithPagination({ page = 1, pageSize = 10, name, auditStatus, available }) {
+    // 校验分页参数
+    page = Math.max(1, parseInt(page) || 1);
+    pageSize = Math.min(100, Math.max(1, parseInt(pageSize) || 10));
+
     const conditions = [];
     const params = [];
 
@@ -44,9 +51,12 @@ const ImageModel = {
     const values = [];
 
     for (const [key, value] of Object.entries(data)) {
+      if (!VALID_COLUMNS.includes(key)) continue;
       fields.push(key);
       values.push(value);
     }
+
+    if (fields.length === 0) return null;
 
     const sql = `INSERT INTO images (${fields.join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`;
     const [result] = await pool.query(sql, values);
@@ -60,11 +70,12 @@ const ImageModel = {
     const values = [];
 
     for (const [key, value] of Object.entries(data)) {
+      if (!VALID_COLUMNS.includes(key)) continue;
       setClauses.push(`${key} = ?`);
       values.push(value);
     }
 
-    if (setClauses.length === 0) return await this.findById(id);
+    if (setClauses.length === 0) return null;
 
     values.push(id);
     const sql = `UPDATE images SET ${setClauses.join(', ')} WHERE id = ?`;
