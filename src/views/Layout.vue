@@ -79,9 +79,13 @@ import { useRouter, useRoute } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { Menu, ArrowLeft, HomeFilled, Expand, Close } from '@element-plus/icons-vue'
+import { useMenuStore } from '@/stores/menu'
+import { usePermissionStore } from '@/stores/permission'
 
 const router = useRouter()
 const route = useRoute()
+const menuStore = useMenuStore()
+const permissionStore = usePermissionStore()
 const isHome = computed(() => route.path === '/dashboard')
 const sidebarCollapsed = ref(sessionStorage.getItem('voNR_sidebarCollapsed') === 'true')
 
@@ -186,7 +190,7 @@ const handleKeydown = (e) => {
   if (e.key === 'Escape') closeContextMenu()
 }
 
-onMounted(() => {
+onMounted(async () => {
   // 从 sessionStorage 恢复 tabs
   const savedTabs = sessionStorage.getItem('voNR_tabs')
   if (savedTabs) {
@@ -197,6 +201,14 @@ onMounted(() => {
   // 确保不包含 Dashboard（已由 HomeFilled 图标替代）
   tabs.value = tabs.value.filter(t => t.path !== '/dashboard')
   document.addEventListener('keydown', handleKeydown)
+
+  // 如果菜单未加载，则获取菜单
+  if (!menuStore.loaded) {
+    await menuStore.fetchMenus()
+  }
+  if (!permissionStore.loaded) {
+    await permissionStore.fetchPermissions()
+  }
 })
 onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
