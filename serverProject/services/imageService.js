@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const ImageModel = require('../models/imageModel');
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'images');
+const ALLOWED_PREFIX = '/uploads/images/';
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
 
 const ImageService = {
   // 分页查询图片列表
@@ -27,39 +29,16 @@ const ImageService = {
 
   // 新增图片
   async createImage(file, data) {
-    // 用 sharp 提取图片分辨率
-    const metadata = await sharp(file.path).metadata();
-    const resolution = metadata.width && metadata.height
-      ? `${metadata.width}×${metadata.height}`
-      : '';
-
-    // 生成存储路径：uploads/images/YYYY/MM/DD/uuid.ext
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const ext = path.extname(file.originalname);
-    const fileName = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
-    const relativeDir = `/${year}/${month}/${day}`;
-    const targetDir = path.join(UPLOAD_DIR, String(year), month, day);
-    const targetPath = path.join(targetDir, fileName);
-
-    // 确保目录存在
-    fs.mkdirSync(targetDir, { recursive: true });
-    // 移动文件
-    fs.renameSync(file.path, targetPath);
-
-    const filePath = `/uploads/images${relativeDir}/${fileName}`;
-    const format = ext.replace('.', '').toLowerCase();
+    const fileInfo = await this._processUploadedFile(file);
 
     const record = await ImageModel.create({
       name: data.name,
-      file_path: filePath,
-      file_name: file.originalname,
+      file_path: fileInfo.filePath,
+      file_name: fileInfo.fileName,
       thumbnail_path: data.thumbnailPath || '',
-      resolution,
-      format,
-      file_size: file.size,
+      resolution: fileInfo.resolution,
+      format: fileInfo.format,
+      file_size: fileInfo.fileSize,
       audit_type: data.auditType || '新增',
       audit_status: data.auditStatus || '审核中',
       sync_status: data.syncStatus || '未同步',
@@ -79,35 +58,16 @@ const ImageService = {
       // 获取旧记录信息，用于删除旧文件
       const oldItem = await ImageModel.findById(id);
       if (oldItem && oldItem.file_path) {
-        const oldFullPath = path.join(__dirname, '..', oldItem.file_path);
-        if (fs.existsSync(oldFullPath)) {
-          fs.unlinkSync(oldFullPath);
-        }
+        this._safeDeleteFile(oldItem.file_path);
       }
 
-      // 用 sharp 提取新图片分辨率
-      const metadata = await sharp(file.path).metadata();
-      updateData.resolution = metadata.width && metadata.height
-        ? `${metadata.width}×${metadata.height}`
-        : '';
-
-      // 生成新的存储路径
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const ext = path.extname(file.originalname);
-      const fileName = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
-      const targetDir = path.join(UPLOAD_DIR, String(year), month, day);
-      const targetPath = path.join(targetDir, fileName);
-
-      fs.mkdirSync(targetDir, { recursive: true });
-      fs.renameSync(file.path, targetPath);
-
-      updateData.file_path = `/uploads/images/${year}/${month}/${day}/${fileName}`;
-      updateData.file_name = file.originalname;
-      updateData.format = ext.replace('.', '').toLowerCase();
-      updateData.file_size = file.size;
+      // 处理新上传的文件
+      const fileInfo = await this._processUploadedFile(file);
+      updateData.file_path = fileInfo.filePath;
+      updateData.file_name = fileInfo.fileName;
+      updateData.resolution = fileInfo.resolution;
+      updateData.format = fileInfo.format;
+      updateData.file_size = fileInfo.fileSize;
     }
 
     // 将驼峰字段转为下划线字段
@@ -138,12 +98,9 @@ const ImageService = {
     const item = await ImageModel.findById(id);
     if (!item) return null;
 
-    // 删除文件
+    // 安全删除文件
     if (item.file_path) {
-      const fullPath = path.join(__dirname, '..', item.file_path);
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
-      }
+      this._safeDeleteFile(item.file_path);
     }
 
     const deleted = await ImageModel.delete(id);
@@ -155,13 +112,10 @@ const ImageService = {
     // 获取所有要删除的图片信息
     const items = await Promise.all(ids.map(id => ImageModel.findById(id)));
 
-    // 删除所有文件
+    // 安全删除所有文件
     for (const item of items) {
       if (item && item.file_path) {
-        const fullPath = path.join(__dirname, '..', item.file_path);
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
+        this._safeDeleteFile(item.file_path);
       }
     }
 
@@ -193,14 +147,70 @@ const ImageService = {
     };
   },
 
+  // 校验文件路径是否在允许的目录下
+  _validateFilePath(filePath) {
+    if (!filePath || typeof filePath !== 'string') {
+      return false;
+    }
+    return filePath.startsWith(ALLOWED_PREFIX);
+  },
+
+  // 处理上传的文件：提取分辨率、移动文件、返回元数据
+  async _processUploadedFile(file) {
+    // 校验扩展名是否为合法的图片格式
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      throw new Error(`不支持的图片格式: ${ext}`);
+    }
+
+    // 用 sharp 提取图片分辨率
+    const metadata = await sharp(file.path).metadata();
+    const resolution = metadata.width && metadata.height
+      ? `${metadata.width}×${metadata.height}`
+      : '';
+
+    // 生成存储路径：uploads/images/YYYY/MM/DD/uuid.ext
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const fileName = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+    const targetDir = path.join(UPLOAD_DIR, String(year), month, day);
+    const targetPath = path.join(targetDir, fileName);
+
+    // 确保目录存在
+    fs.mkdirSync(targetDir, { recursive: true });
+    // 移动文件
+    fs.renameSync(file.path, targetPath);
+
+    return {
+      filePath: `/uploads/images/${year}/${month}/${day}/${fileName}`,
+      fileName: file.originalname,
+      resolution,
+      format: ext.replace('.', ''),
+      fileSize: file.size
+    };
+  },
+
+  // 安全删除文件
+  _safeDeleteFile(filePath) {
+    if (!this._validateFilePath(filePath)) {
+      console.error('非法文件路径:', filePath);
+      return;
+    }
+    const fullPath = path.join(__dirname, '..', filePath);
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+    }
+  },
+
   // 格式化文件大小
   formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB'];
+    if (!bytes || bytes <= 0) return '未知';
     const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const size = (bytes / Math.pow(k, i)).toFixed(2);
-    return `${size} ${units[i]}`;
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 };
 
