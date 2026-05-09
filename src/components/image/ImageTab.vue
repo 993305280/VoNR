@@ -94,8 +94,15 @@ const handlePreview = (row) => {
   detailModalVisible.value = true
 }
 
+const openAdd = () => {
+  currentRow.value = null
+  formModalMode.value = 'add'
+  formModalVisible.value = true
+}
+
 defineExpose({
-  handleBatchDelete
+  handleBatchDelete,
+  openAdd
 })
 </script>
 
