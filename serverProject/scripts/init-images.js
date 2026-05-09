@@ -39,12 +39,12 @@ async function initImages() {
 
     // 插入示例数据
     const images = [
-      ['亚太银行数字化大会', '/uploads/images/2024/03/25/sample1.png', 'sample1.png', '1920×1080', 'png', 1065000, '新增', '审核中', '未同步', 0, '这是说明这是说明', 'admin@VoNR'],
-      ['端午节活动图片', '/uploads/images/2024/03/25/sample2.png', 'sample2.png', '512×512', 'png', 980000, '新增', '审核失败', '未同步', 0, '这是说明这是说明这里...', 'admin@VoNR'],
-      ['亚太银行数字化大会', '/uploads/images/2024/03/25/sample3.png', 'sample3.png', '1000×654', 'png', 1065000, '删除', '审核成功', '未同步', 0, '这是说明这是说明', 'admin@VoNR'],
-      ['端午节活动图片', '/uploads/images/2024/03/25/sample4.png', 'sample4.png', '512×512', 'png', 980000, '编辑', '审核中', '未同步', 1, '这是说明这是说明这里...', 'admin@VoNR'],
-      ['亚太银行数字化大会', '/uploads/images/2024/03/25/sample5.png', 'sample5.png', '1920×1080', 'png', 1065000, '编辑', '审核成功', '同步成功', 1, '这是说明这是说明', 'admin@VoNR'],
-      ['端午节活动图片', '/uploads/images/2024/03/25/sample6.png', 'sample6.png', '512×512', 'png', 980000, '编辑', '审核成功', '同步失败', 1, '这是说明这是说明这里...', 'admin@VoNR']
+      { name: '亚太银行数字化大会', filePath: '/uploads/images/2024/03/25/sample1.png', fileName: 'sample1.png', resolution: '1920×1080', format: 'png', fileSize: 1065000, auditType: '新增', auditStatus: '审核中', syncStatus: '未同步', available: 0, description: '银行数字化转型大会宣传图', operator: 'admin@VoNR' },
+      { name: '端午节活动图片', filePath: '/uploads/images/2024/03/25/sample2.png', fileName: 'sample2.png', resolution: '512×512', format: 'png', fileSize: 980000, auditType: '新增', auditStatus: '审核失败', syncStatus: '未同步', available: 0, description: '端午节主题活动海报', operator: 'admin@VoNR' },
+      { name: '亚太银行数字化大会', filePath: '/uploads/images/2024/03/25/sample3.png', fileName: 'sample3.png', resolution: '1000×654', format: 'png', fileSize: 1065000, auditType: '删除', auditStatus: '审核成功', syncStatus: '未同步', available: 0, description: '大会现场照片', operator: 'admin@VoNR' },
+      { name: '端午节活动图片', filePath: '/uploads/images/2024/03/25/sample4.png', fileName: 'sample4.png', resolution: '512×512', format: 'png', fileSize: 980000, auditType: '编辑', auditStatus: '审核中', syncStatus: '未同步', available: 1, description: '端午节活动 banner 图', operator: 'admin@VoNR' },
+      { name: '亚太银行数字化大会', filePath: '/uploads/images/2024/03/25/sample5.png', fileName: 'sample5.png', resolution: '1920×1080', format: 'png', fileSize: 1065000, auditType: '编辑', auditStatus: '审核成功', syncStatus: '同步成功', available: 1, description: '银行数字化大会主视觉', operator: 'admin@VoNR' },
+      { name: '端午节活动图片', filePath: '/uploads/images/2024/03/25/sample6.png', fileName: 'sample6.png', resolution: '512×512', format: 'png', fileSize: 980000, auditType: '编辑', auditStatus: '审核成功', syncStatus: '同步失败', available: 1, description: '端午节祝福图片', operator: 'admin@VoNR' }
     ];
 
     const insertSQL = `
@@ -53,7 +53,20 @@ async function initImages() {
     `;
 
     for (const image of images) {
-      await pool.query(insertSQL, image);
+      await pool.query(insertSQL, [
+        image.name,
+        image.filePath,
+        image.fileName,
+        image.resolution,
+        image.format,
+        image.fileSize,
+        image.auditType,
+        image.auditStatus,
+        image.syncStatus,
+        image.available,
+        image.description,
+        image.operator
+      ]);
     }
     console.log('示例数据插入成功');
 
