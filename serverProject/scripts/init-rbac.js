@@ -1,5 +1,4 @@
 const mysql = require('mysql2/promise');
-const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 async function initRBAC() {
@@ -133,13 +132,13 @@ async function initRBAC() {
     if (existingRoleMenus.length === 0) {
       // admin 角色拥有所有菜单
       const [allMenus] = await pool.query('SELECT id FROM menus');
-      const adminValues = allMenus.map(menu => `(1, ${menu.id})`).join(',');
-      await pool.query(`INSERT INTO role_menus (role_id, menu_id) VALUES ${adminValues}`);
+      const adminValues = allMenus.map(menu => [1, menu.id]);
+      await pool.query('INSERT INTO role_menus (role_id, menu_id) VALUES ?', [adminValues]);
 
       // user 角色拥有查看权限的菜单
       const [viewMenus] = await pool.query("SELECT id FROM menus WHERE permission LIKE '%:view'");
-      const userValues = viewMenus.map(menu => `(2, ${menu.id})`).join(',');
-      await pool.query(`INSERT INTO role_menus (role_id, menu_id) VALUES ${userValues}`);
+      const userValues = viewMenus.map(menu => [2, menu.id]);
+      await pool.query('INSERT INTO role_menus (role_id, menu_id) VALUES ?', [userValues]);
 
       console.log('角色-菜单关联初始化成功');
     }
