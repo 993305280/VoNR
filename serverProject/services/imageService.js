@@ -152,7 +152,19 @@ const ImageService = {
     if (!filePath || typeof filePath !== 'string') {
       return false;
     }
-    return filePath.startsWith(ALLOWED_PREFIX);
+    if (!filePath.startsWith(ALLOWED_PREFIX)) {
+      return false;
+    }
+
+    // 规范化路径，检查是否仍在允许的目录下（防止路径遍历攻击）
+    const fullPath = path.resolve(__dirname, '..', filePath);
+    const allowedDir = path.resolve(UPLOAD_DIR);
+    if (!fullPath.startsWith(allowedDir)) {
+      console.error('非法文件路径（路径遍历）:', filePath);
+      return false;
+    }
+
+    return true;
   },
 
   // 处理上传的文件：提取分辨率、移动文件、返回元数据
