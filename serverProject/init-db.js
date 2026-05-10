@@ -55,6 +55,27 @@ async function initDatabase() {
     `);
     console.log('应用表创建成功');
 
+    // 创建业务配置表
+    await tempPool.query(`
+      CREATE TABLE IF NOT EXISTS business_configs (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        code VARCHAR(50) NOT NULL COMMENT '业务指令',
+        app_id INT COMMENT '关联应用ID',
+        app_name VARCHAR(100) COMMENT '应用名称',
+        scene VARCHAR(100) COMMENT '业务场景',
+        sub_scene VARCHAR(100) COMMENT '子业务场景',
+        type VARCHAR(20) COMMENT '操作类型',
+        channel VARCHAR(10) COMMENT '渠道',
+        status ENUM('enabled', 'disabled') DEFAULT 'enabled',
+        audit_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+        available_status ENUM('available', 'unavailable') DEFAULT 'available',
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('业务配置表创建成功');
+
     // 检查是否存在管理员用户
     const [existing] = await tempPool.query('SELECT id FROM users WHERE username = ?', ['admin']);
 
