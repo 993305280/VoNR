@@ -76,6 +76,26 @@ async function initDatabase() {
     `);
     console.log('业务配置表创建成功');
 
+    // 创建用户订购关系表
+    await tempPool.query(`
+      CREATE TABLE IF NOT EXISTS user_subscriptions (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        phone VARCHAR(20) NOT NULL COMMENT '用户号码',
+        app_id INT COMMENT '应用ID',
+        app_name VARCHAR(100) COMMENT '应用名称',
+        subscription_time DATETIME COMMENT '订购时间',
+        business_scene VARCHAR(100) COMMENT '业务场景',
+        sub_scenes TEXT COMMENT '子业务场景',
+        description TEXT COMMENT '应用说明',
+        operator VARCHAR(100) COMMENT '操作者',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_phone (phone),
+        INDEX idx_app_id (app_id)
+      )
+    `);
+    console.log('用户订购关系表创建成功');
+
     // 检查是否存在管理员用户
     const [existing] = await tempPool.query('SELECT id FROM users WHERE username = ?', ['admin']);
 
