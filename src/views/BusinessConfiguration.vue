@@ -3,7 +3,6 @@
     <div class="header-section">
       <h3 class="page-title">业务配置</h3>
       <div class="button-group">
-        <el-button type="primary" :icon="Refresh" class="btn-sync">同步业务配置</el-button>
         <el-button type="primary" :icon="Plus" @click="handleAdd">新增业务配置</el-button>
         <el-button type="danger" :icon="Delete" @click="handleBatchDelete">删除业务配置</el-button>
       </div>
@@ -44,7 +43,7 @@
     </div>
 
     <div class="table-container">
-      <el-table :data="tableData" style="width: 100%" @selection-change="handleSelection">
+      <el-table :data="tableData" v-loading="loading" style="width: 100%" @selection-change="handleSelection">
         <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="编号" width="70" />
         <el-table-column prop="code" label="业务指令" />
@@ -55,17 +54,25 @@
         <el-table-column prop="channel" label="渠道" />
         <el-table-column label="状态">
           <template #default="scope">
-            <el-switch v-model="scope.row.status" active-text="启用" inactive-text="禁用" inline-prompt />
+            <el-tag :type="scope.row.status === 'enabled' ? 'success' : 'danger'">
+              {{ scope.row.status === 'enabled' ? '启用' : '禁用' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="审核状态">
           <template #default="scope">
             <span class="audit-link" @click="showAuditDetail(scope.row)">
-              【新增】<span class="text-green">审核成功</span>
+              <span :class="{
+                'text-green': scope.row.auditStatus === 'approved',
+                'text-orange': scope.row.auditStatus === 'pending',
+                'text-red': scope.row.auditStatus === 'rejected'
+              }">
+                {{ scope.row.auditStatus === 'approved' ? '审核成功' : scope.row.auditStatus === 'pending' ? '待审核' : '审核失败' }}
+              </span>
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="available" label="可用状态" />
+        <el-table-column prop="availableStatus" label="可用状态" />
         <el-table-column label="操作" width="120">
           <template #default="scope">
             <el-button link type="primary" @click="handleEdit(scope.row)">编辑</el-button>
@@ -73,31 +80,37 @@
           </template>
         </el-table-column>
       </el-table>
-      
-      <UnifiedPagination :total="360" />
+
+      <UnifiedPagination :total="total" />
     </div>
 
-    <ConfigDialog ref="configDialogRef" @refresh="fetchData" />
+    <ConfigDialog ref="configDialogRef" @save="handleSave" />
     <AuditDetailDialog ref="auditDialogRef" />
     <DeleteConfirmDialog ref="deleteDialogRef" @confirm="handleDeleteConfirm" />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { Refresh, Plus, Delete } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { Plus, Delete } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useBusinessConfigData } from '@/composables/useBusinessConfigData'
 import ConfigDialog from '@/components/ConfigDialog.vue'
 import AuditDetailDialog from '@/components/AuditDetailDialog.vue'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog.vue'
 import UnifiedPagination from '@/components/common/UnifiedPagination.vue'
 
-const searchForm = reactive({ code: '', status: '', audit: '', available: '', appName: '' })
-const tableData = ref([
-  { id: '001', code: '*10#', appName: '企业品牌宣传应用5', scene: '001趣味通话', subScene: '001001虚拟背景', type: '开启', channel: 'DC', status: false, available: '可用' },
-  { id: '002', code: '*11#', appName: '企业品牌宣传应用5', scene: '001趣味通话', subScene: '001001虚拟背景', type: '停止', channel: 'DC', status: true, available: '可用' },
-  // ... 更多模拟数据
-])
+const {
+  tableData,
+  loading,
+  total,
+  searchParams,
+  handleSearch,
+  handleReset,
+  handleDelete: executeDelete,
+  handleCreate,
+  handleUpdate
+} = useBusinessConfigData()
 
 const selectedRows = ref([])
 const currentRow = ref(null)
@@ -109,49 +122,54 @@ const handleSelection = (selection) => {
   selectedRows.value = selection
 }
 
-// 刷新数据
-const fetchData = () => {
-  console.log('刷新数据')
-  // 这里可以添加实际的数据获取逻辑
-  // 例如: axios.get('/api/business-config').then(res => { tableData.value = res.data })
-}
-
 const handleAdd = () => configDialogRef.value.open('新增业务配置')
 const handleEdit = (row) => configDialogRef.value.open('编辑业务配置', row)
 const showAuditDetail = (row) => auditDialogRef.value.open(row)
+
 const handleDelete = (row) => {
   currentRow.value = row
   deleteDialogRef.value.open(false)
 }
+
 const handleBatchDelete = () => {
   if (selectedRows.value.length === 0) {
-    // 可以给用户一个提示，没有选择任何行
     ElMessage.warning('请至少选择一条记录进行删除')
     return
   }
   deleteDialogRef.value.open(true)
 }
 
-const handleDeleteConfirm = (isBatch) => {
-  if (isBatch) {
-    // 批量删除逻辑
-    // 从 tableData 中移除选中的行
-    const selectedIds = selectedRows.value.map(item => item.id)
-    tableData.value = tableData.value.filter(item => !selectedIds.includes(item.id))
-    // 清空选中
-    selectedRows.value = []
-    ElMessage.success('批量删除成功')
-  } else {
-    // 单个删除逻辑
-    if (currentRow.value) {
-      const id = currentRow.value.id
-      tableData.value = tableData.value.filter(item => item.id !== id)
-      currentRow.value = null
-      ElMessage.success('删除成功')
+const handleDeleteConfirm = async (isBatch) => {
+  try {
+    if (isBatch) {
+      const selectedIds = selectedRows.value.map(item => item.id)
+      await executeDelete(selectedIds)
+      selectedRows.value = []
+      ElMessage.success('批量删除成功')
+    } else {
+      if (currentRow.value) {
+        await executeDelete(currentRow.value.id)
+        currentRow.value = null
+        ElMessage.success('删除成功')
+      }
     }
+  } catch (error) {
+    // Error already handled in composable
   }
-  // 这里可以添加实际的后端删除请求
-  // 例如: axios.post('/api/business-config/delete', { ids: [...selectedIds] })
+  deleteDialogRef.value.close()
+}
+
+const handleSave = async (data) => {
+  try {
+    if (data.id) {
+      await handleUpdate(data.id, data)
+    } else {
+      await handleCreate(data)
+    }
+    configDialogRef.value.close()
+  } catch (error) {
+    // Error already handled in composable
+  }
 }
 </script>
 
@@ -167,7 +185,6 @@ const handleDeleteConfirm = (isBatch) => {
     align-items: center;
     margin-bottom: 20px;
     .page-title { margin: 0; font-size: 18px; }
-    .btn-sync { background-color: #4079de; }
   }
 
   .search-card {
@@ -190,6 +207,8 @@ const handleDeleteConfirm = (isBatch) => {
       cursor: pointer;
       color: #333;
       .text-green { color: #67c23a; }
+      .text-orange { color: #e6a23c; }
+      .text-red { color: #f56c6c; }
     }
   }
 }
