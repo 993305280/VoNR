@@ -12,5 +12,7 @@ router.use('/', imageRoutes);
 router.use('/', applicationRoutes);
 const businessConfigRoutes = require('./businessConfig');
 router.use('/', businessConfigRoutes);
+const userSubscriptionRoutes = require('./userSubscription');
+router.use('/', userSubscriptionRoutes);
 
 module.exports = router;
