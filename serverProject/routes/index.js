@@ -3,10 +3,12 @@ const router = express.Router();
 const authRoutes = require('./auth');
 const menuRoutes = require('./menu');
 const imageRoutes = require('./image');
+const applicationRoutes = require('./application');
 
 // 挂载路由
 router.use('/auth', authRoutes);
 router.use('/', menuRoutes);
 router.use('/', imageRoutes);
+router.use('/', applicationRoutes);
 
 module.exports = router;
