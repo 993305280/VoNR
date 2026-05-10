@@ -63,9 +63,10 @@ const title = ref('')
 const isEdit = ref(false)
 const linkAppRef = ref()
 
-const emit = defineEmits(['refresh'])
+const emit = defineEmits(['refresh', 'save'])
 
 const form = reactive({
+  id: null,
   code: '',
   appName: '',
   scene: '',
@@ -83,6 +84,7 @@ const open = (dialogTitle, rowData) => {
   if (rowData) {
     // 编辑模式，填充数据
     isEdit.value = true
+    form.id = rowData.id
     form.code = rowData.code
     form.appName = rowData.appName
     form.scene = rowData.scene
@@ -94,6 +96,7 @@ const open = (dialogTitle, rowData) => {
   } else {
     // 新增模式，重置表单
     isEdit.value = false
+    form.id = null
     form.code = ''
     form.appName = ''
     form.scene = ''
@@ -109,13 +112,14 @@ const open = (dialogTitle, rowData) => {
 
 // 保存
 const save = () => {
-  // 这里添加保存逻辑，可以调用API
-  console.log('保存数据:', { ...form })
+  const data = { ...form }
+  if (isEdit.value) {
+    data.id = form.id
+  }
+  emit('save', data)
+}
 
-  // 触发刷新事件
-  emit('refresh')
-
-  // 关闭弹窗
+const close = () => {
   visible.value = false
 }
 
@@ -133,7 +137,8 @@ const handleAppSelect = (appData) => {
 
 // 暴露方法给父组件
 defineExpose({
-  open
+  open,
+  close
 })
 </script>
 
