@@ -39,6 +39,22 @@ async function initDatabase() {
     `);
     console.log('用户表创建成功');
 
+    // 创建应用表
+    await tempPool.query(`
+      CREATE TABLE IF NOT EXISTS applications (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(100) NOT NULL,
+        business_scene VARCHAR(50),
+        sub_scenes JSON,
+        audit_status ENUM('pending', 'approved', 'rejected', 'sync_success') DEFAULT 'pending',
+        available_status ENUM('available', 'unavailable') DEFAULT 'available',
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('应用表创建成功');
+
     // 检查是否存在管理员用户
     const [existing] = await tempPool.query('SELECT id FROM users WHERE username = ?', ['admin']);
 
