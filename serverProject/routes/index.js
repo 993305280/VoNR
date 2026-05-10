@@ -14,5 +14,7 @@ const businessConfigRoutes = require('./businessConfig');
 router.use('/', businessConfigRoutes);
 const userSubscriptionRoutes = require('./userSubscription');
 router.use('/', userSubscriptionRoutes);
+const statisticsRoutes = require('./statistics');
+router.use('/', statisticsRoutes);
 
 module.exports = router;

@@ -98,16 +98,17 @@ export function useUserSubscriptionData() {
 
   const handleDelete = async (ids) => {
     try {
+      let success = false
       if (Array.isArray(ids)) {
         const res = await batchDeleteUserSubscriptions(ids)
-        if (res.code === 200) {
-          return true
-        }
+        success = res.code === 200
       } else {
         const res = await deleteUserSubscription(ids)
-        if (res.code === 200) {
-          return true
-        }
+        success = res.code === 200
+      }
+      if (success) {
+        await fetchData()
+        return true
       }
       return false
     } catch (error) {

@@ -34,7 +34,7 @@ const handleSizeChange = (size) => {
 
 <style lang="scss" scoped>
 .pagination-wrapper {
-  margin-top: 25px;
+  margin-top: 16px;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -9,35 +9,39 @@
     </div>
 
     <div class="search-card">
-      <el-form :inline="true" :model="searchForm" label-width="70px">
+      <el-form :model="searchForm" label-width="70px">
         <div class="search-row">
-          <el-form-item label="业务指令">
+          <el-form-item label="业务指令" class="search-item">
             <el-input v-model="searchForm.code" placeholder="请输入" />
           </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="searchForm.status" style="width: 150px;"  placeholder="全部状态">
-              <el-option label="全部状态"  value="" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="审核状态">
-            <el-select v-model="searchForm.audit" style="width: 150px;" placeholder="全部状态">
+          <el-form-item label="状态" class="search-item">
+            <el-select v-model="searchForm.status" placeholder="全部状态">
               <el-option label="全部状态" value="" />
             </el-select>
           </el-form-item>
-          <el-form-item label="可用状态">
-            <el-select v-model="searchForm.available" style="width: 150px;" placeholder="全部状态">
+          <el-form-item label="审核状态" class="search-item">
+            <el-select v-model="searchForm.audit" placeholder="全部状态">
+              <el-option label="全部状态" value="" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="可用状态" class="search-item">
+            <el-select v-model="searchForm.available" placeholder="全部状态">
               <el-option label="全部状态" value="" />
             </el-select>
           </el-form-item>
         </div>
-        <div class="search-row">
-          <el-form-item label="应用名称">
+        <div class="search-row search-row-btns">
+          <el-form-item label="应用名称" class="search-item">
             <el-input v-model="searchForm.appName" placeholder="请输入" />
           </el-form-item>
-          <div class="search-btns">
-            <el-button type="primary" class="btn-query">查询</el-button>
-            <el-button class="btn-reset">重置</el-button>
+          <div class="search-item">
+            <div class="search-btns">
+              <el-button type="primary" class="btn-query" @click="handleSearchWithForm">查询</el-button>
+              <el-button class="btn-reset" @click="handleResetWithForm">重置</el-button>
+            </div>
           </div>
+          <div class="search-item search-item-empty"></div>
+          <div class="search-item search-item-empty"></div>
         </div>
       </el-form>
     </div>
@@ -81,7 +85,13 @@
         </el-table-column>
       </el-table>
 
-      <UnifiedPagination :total="total" />
+      <UnifiedPagination
+        :total="total"
+        :current-page="pagination.current"
+        :page-size="pagination.pageSize"
+        @page-change="handlePageChange"
+        @size-change="handlePageSizeChange"
+      />
     </div>
 
     <ConfigDialog ref="configDialogRef" @save="handleSave" />
@@ -104,13 +114,18 @@ const {
   tableData,
   loading,
   total,
+  pagination,
   searchParams,
   handleSearch,
   handleReset,
+  handlePageChange,
+  handlePageSizeChange,
   handleDelete: executeDelete,
   handleCreate,
   handleUpdate
 } = useBusinessConfigData()
+
+const searchForm = ref({ code: '', status: '', audit: '', available: '', appName: '' })
 
 const selectedRows = ref([])
 const currentRow = ref(null)
@@ -120,6 +135,24 @@ const deleteDialogRef = ref()
 
 const handleSelection = (selection) => {
   selectedRows.value = selection
+}
+
+const syncSearchParams = () => {
+  searchParams.code = searchForm.value.code
+  searchParams.status = searchForm.value.status
+  searchParams.auditStatus = searchForm.value.audit
+  searchParams.availableStatus = searchForm.value.available
+  searchParams.appName = searchForm.value.appName
+}
+
+const handleSearchWithForm = () => {
+  syncSearchParams()
+  handleSearch()
+}
+
+const handleResetWithForm = () => {
+  searchForm.value = { code: '', status: '', audit: '', available: '', appName: '' }
+  handleReset()
 }
 
 const handleAdd = () => configDialogRef.value.open('新增业务配置')
@@ -192,17 +225,75 @@ const handleSave = async (data) => {
     padding: 20px 20px 0;
     border-radius: 4px;
     margin-bottom: 15px;
-    .search-row { display: flex; gap: 20px; }
-    .search-btns { margin-left: 20px; padding-top: 4px; }
-    .btn-query { background-color: #4079de; width: 70px; }
-    .btn-reset { color: #4079de; border-color: #dcdfe6; width: 70px; }
+
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .search-row-btns {
+      justify-content: space-between;
+    }
+
+    .search-item {
+      flex: 0 0 calc(25% - 12px);
+      min-width: 200px;
+      margin-bottom: 0;
+
+      :deep(.el-form-item__content) {
+        flex: 1;
+      }
+
+      :deep(.el-select),
+      :deep(.el-input) {
+        width: 100%;
+      }
+    }
+
+    .search-item-empty {
+      visibility: hidden;
+    }
+
+    .search-btns {
+      display: flex;
+      gap: 12px;
+      padding-left: 30px;
+    }
+
+    .btn-query {
+      background-color: #4079de;
+      width: 70px;
+    }
+
+    .btn-reset {
+      color: #4079de;
+      border-color: #dcdfe6;
+      width: 70px;
+    }
   }
 
   .table-container {
     background: #fff;
     padding: 20px;
     border-radius: 4px;
-    
+    height: 540px;
+    display: flex;
+    flex-direction: column;
+
+    .el-table {
+      flex: 1;
+
+      :deep(.el-table__body-wrapper) {
+        overflow-y: auto;
+      }
+    }
+
     .audit-link {
       cursor: pointer;
       color: #333;

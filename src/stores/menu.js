@@ -21,6 +21,7 @@ export const useMenuStore = defineStore('menu', {
   actions: {
     async fetchMenus() {
       try {
+        // 每次都从服务器获取最新菜单数据
         const res = await getMenus()
         if (res.code === 200) {
           this.menus = res.data

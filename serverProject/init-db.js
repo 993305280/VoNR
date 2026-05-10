@@ -96,6 +96,26 @@ async function initDatabase() {
     `);
     console.log('用户订购关系表创建成功');
 
+    // 创建通话记录表
+    await tempPool.query(`
+      CREATE TABLE IF NOT EXISTS call_records (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        call_id VARCHAR(50) NOT NULL COMMENT '通话标识',
+        caller_number VARCHAR(20) NOT NULL COMMENT '主叫号码',
+        callee_number VARCHAR(20) NOT NULL COMMENT '被叫号码',
+        app_id VARCHAR(50) COMMENT '应用ID',
+        call_direction ENUM('uplink', 'downlink') COMMENT '通话方向',
+        call_type ENUM('audio', 'video') COMMENT '通话类型',
+        business_scene ENUM('funCall','smartTrans','screenLight','callSubtitle') COMMENT '业务场景',
+        start_time DATETIME NOT NULL COMMENT '开始时间',
+        end_time DATETIME COMMENT '结束时间',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_start_time (start_time),
+        INDEX idx_app_id (app_id)
+      )
+    `);
+    console.log('通话记录表创建成功');
+
     // 检查是否存在管理员用户
     const [existing] = await tempPool.query('SELECT id FROM users WHERE username = ?', ['admin']);
 

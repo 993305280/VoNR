@@ -25,14 +25,18 @@ const open = (batch = false) => {
   visible.value = true
 }
 
+const close = () => {
+  visible.value = false
+}
+
 const confirm = () => {
   emit('confirm', isBatch.value)
-  visible.value = false
 }
 
 // 暴露方法给父组件
 defineExpose({
-  open
+  open,
+  close
 })
 </script>
 
