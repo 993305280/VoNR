@@ -162,25 +162,29 @@ function handleLogin() {
   })
 }
 
-function doLogin() {
+async function doLogin() {
   if (form.captcha.toLowerCase() !== captchaCode.value.toLowerCase()) {
     ElMessage.error('验证码错误')
     refreshCaptcha()
     return
   }
 
-  if (form.username !== 'admin' || form.password !== '123456') {
-    ElMessage.error('用户名或密码错误')
-    return
-  }
-
   loading.value = true
-  setTimeout(() => {
+  try {
+    const result = await authStore.login(form.username, form.password)
+    if (result.success) {
+      ElMessage.success('登录成功')
+      router.push('/dashboard')
+    } else {
+      ElMessage.error(result.message || '登录失败')
+      refreshCaptcha()
+    }
+  } catch {
+    ElMessage.error('网络错误，请稍后重试')
+    refreshCaptcha()
+  } finally {
     loading.value = false
-    authStore.login(form.username)
-    ElMessage.success('登录成功')
-    router.push('/dashboard')
-  }, 500)
+  }
 }
 
 onMounted(() => {

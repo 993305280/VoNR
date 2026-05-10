@@ -111,9 +111,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  if (to.path !== '/login' && !authStore.isLoggedIn) {
+  const hasToken = !!authStore.token
+
+  if (to.path !== '/login' && !hasToken) {
     next('/login')
-  } else if (to.path === '/login' && authStore.isLoggedIn) {
+  } else if (to.path === '/login' && hasToken) {
     next('/dashboard')
   } else {
     next()

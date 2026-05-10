@@ -6,7 +6,7 @@
     <div class="header-right">
       <div class="user-info">
         <el-icon><User /></el-icon>
-        <span>{{ authStore.userInfo?.username || 'Admin' }}</span>
+        <span>{{ authStore.userInfo?.displayName || authStore.userInfo?.username || 'Admin' }}</span>
       </div>
       <el-button type="primary" :icon="SwitchButton" circle @click="handleLogout" />
     </div>
@@ -27,8 +27,8 @@ const handleLogout = () => {
     type: 'warning',
     confirmButtonText: '确定',
     cancelButtonText: '取消'
-  }).then(() => {
-    authStore.logout()
+  }).then(async () => {
+    await authStore.logout()
     sessionStorage.removeItem('voNR_tabs')
     sessionStorage.removeItem('voNR_sidebarCollapsed')
     router.push('/login')
