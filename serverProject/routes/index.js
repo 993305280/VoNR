@@ -10,5 +10,7 @@ router.use('/auth', authRoutes);
 router.use('/', menuRoutes);
 router.use('/', imageRoutes);
 router.use('/', applicationRoutes);
+const businessConfigRoutes = require('./businessConfig');
+router.use('/', businessConfigRoutes);
 
 module.exports = router;
