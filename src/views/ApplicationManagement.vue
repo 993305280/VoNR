@@ -28,7 +28,7 @@
       @selection-change="handleSelectionChange"
     />
 
-    <UnifiedPagination :total="360" />
+    <UnifiedPagination :total="total" />
 
     <ApplicationModal
       v-model:visible="modalVisible"
@@ -68,7 +68,9 @@ const {
   handlePageChange,
   handlePageSizeChange,
   handleSync,
-  handleDelete: executeDelete
+  handleDelete: executeDelete,
+  handleCreate,
+  handleUpdate
 } = useApplicationData()
 
 const modalVisible = ref(false)
@@ -124,34 +126,17 @@ const confirmDelete = () => {
   ElMessage.success(deleteMode.value === 'batch' ? `成功删除 ${pendingDeleteIds.value.length} 个应用` : '删除成功')
 }
 
-const handleSave = (data) => {
-  if (isEdit.value) {
-    const index = tableData.value.findIndex(d => d.id === editData.value.id)
-    if (index > -1) {
-      tableData.value[index] = {
-        ...tableData.value[index],
-        name: data.name,
-        businessScene: data.businessScene,
-        subScenes: data.subScenes,
-        description: data.description
-      }
+const handleSave = async (data) => {
+  try {
+    if (isEdit.value) {
+      await handleUpdate(editData.value.id, data)
+    } else {
+      await handleCreate(data)
     }
-  } else {
-    const newId = String(100001 + tableData.value.length)
-    tableData.value.unshift({
-      id: newId,
-      name: data.name,
-      businessScene: data.businessScene,
-      subScenes: data.subScenes,
-      auditStatus: 'pending',
-      auditStatusText: '待审核',
-      availableStatus: 'available',
-      availableStatusText: '可用',
-      description: data.description
-    })
-    total.value = total.value + 1
+    modalVisible.value = false
+  } catch (error) {
+    // Error already handled in composable
   }
-  modalVisible.value = false
 }
 </script>
 

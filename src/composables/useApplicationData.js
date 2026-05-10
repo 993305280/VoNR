@@ -2,6 +2,8 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   getApplications,
+  createApplication,
+  updateApplication,
   deleteApplication,
   batchDeleteApplications
 } from '@/api/application'
@@ -90,8 +92,28 @@ export function useApplicationData() {
     }
   }
 
-  const handleEdit = (id) => {
-    console.log('编辑应用:', id)
+  const handleCreate = async (data) => {
+    try {
+      await createApplication(data)
+      fetchTableData()
+      ElMessage.success('创建成功')
+    } catch (error) {
+      console.error('创建应用失败:', error)
+      ElMessage.error('创建应用失败')
+      throw error
+    }
+  }
+
+  const handleUpdate = async (id, data) => {
+    try {
+      await updateApplication(id, data)
+      fetchTableData()
+      ElMessage.success('更新成功')
+    } catch (error) {
+      console.error('更新应用失败:', error)
+      ElMessage.error('更新应用失败')
+      throw error
+    }
   }
 
   fetchTableData()
@@ -110,6 +132,7 @@ export function useApplicationData() {
     handlePageSizeChange,
     handleSync,
     handleDelete,
-    handleEdit
+    handleCreate,
+    handleUpdate
   }
 }
